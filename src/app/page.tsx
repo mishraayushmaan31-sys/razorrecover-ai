@@ -56,6 +56,44 @@ export default function HomePage() {
   const [forecast] = useState<RevenueForecastResult>(() => generateRevenueForecast());
   const [isResolving, setIsResolving] = useState(false);
 
+  // Incident Comments & Collaboration State
+  const [comments, setComments] = useState<
+    Array<{
+      id: string;
+      content: string;
+      isEdited: boolean;
+      createdAt: string;
+      updatedAt: string;
+      userId: string;
+      user?: { id: string; name: string; email: string };
+    }>
+  >([
+    {
+      id: 'comment-1',
+      content:
+        'Root cause confirmed: HDFC payment service endpoint returning 504 Gateway Timeouts on netbanking rails.',
+      isEdited: false,
+      createdAt: new Date(Date.now() - 45 * 60 * 1000).toISOString(),
+      updatedAt: new Date(Date.now() - 45 * 60 * 1000).toISOString(),
+      userId: 'op-1',
+      user: { id: 'op-1', name: 'Treasury Analyst', email: 'treasury@merchant.com' },
+    },
+    {
+      id: 'comment-2',
+      content:
+        'Dynamic failover to secondary ICICI rail engaged. Monitoring success rates for high-value VIP accounts.',
+      isEdited: false,
+      createdAt: new Date(Date.now() - 20 * 60 * 1000).toISOString(),
+      updatedAt: new Date(Date.now() - 20 * 60 * 1000).toISOString(),
+      userId: 'op-2',
+      user: { id: 'op-2', name: 'Incident Commander', email: 'commander@merchant.com' },
+    },
+  ]);
+  const [newCommentText, setNewCommentText] = useState('');
+  const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
+  const [editingCommentText, setEditingCommentText] = useState('');
+  const [isSubmittingComment, setIsSubmittingComment] = useState(false);
+
   useEffect(() => {
     if (!running) return undefined;
     const timer = window.setTimeout(() => {
@@ -94,16 +132,151 @@ export default function HomePage() {
     setFlowState('idle');
   }
 
-  function handleResolveIncident() {
+  async function handleResolveIncident() {
     setIsResolving(true);
-    setTimeout(() => {
-      setWarRoom(getCanonicalWarRoomData(true, new Date().toISOString()));
-      setIsResolving(false);
-    }, 600);
+    try {
+      const response = await fetch('/api/incidents/war-room/resolve', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      if (response.ok) {
+        const json = await response.json();
+        if (json.data) {
+          setWarRoom(json.data);
+          setIsResolving(false);
+          return;
+        }
+      }
+    } catch {
+      // Fallback to local canonical resolution
+    }
+    setWarRoom(getCanonicalWarRoomData(true, new Date().toISOString()));
+    setIsResolving(false);
   }
 
-  function handleResetIncident() {
+  async function handleResetIncident() {
+    try {
+      const response = await fetch('/api/incidents/war-room/reset', { method: 'POST' });
+      if (response.ok) {
+        const json = await response.json();
+        if (json.data) {
+          setWarRoom(json.data);
+          return;
+        }
+      }
+    } catch {
+      // Fallback
+    }
     setWarRoom(getCanonicalWarRoomData(false));
+  }
+
+  async function handleCreateComment(e: React.FormEvent) {
+    e.preventDefault();
+    if (!newCommentText.trim() || isSubmittingComment) return;
+    setIsSubmittingComment(true);
+
+    const payload = {
+      content: newCommentText.trim(),
+      incidentId: 'incident-1042',
+      issueId: 'issue-1042',
+    };
+    try {
+      const response = await fetch('/api/comments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (response.ok) {
+        const json = await response.json();
+        if (json.data?.comment) {
+          setComments((prev) => [json.data.comment, ...prev]);
+          setNewCommentText('');
+          setIsSubmittingComment(false);
+          return;
+        }
+      }
+    } catch {
+      // Fallback
+    }
+
+    const localComment = {
+      id: `comment-${Date.now()}`,
+      content: newCommentText.trim(),
+      isEdited: false,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      userId: 'demo-user',
+      user: { id: 'demo-user', name: 'Demo Operator', email: 'operator@merchant.com' },
+    };
+    setComments((prev) => [localComment, ...prev]);
+    setNewCommentText('');
+    setIsSubmittingComment(false);
+  }
+
+  function handleStartEdit(comment: { id: string; content: string }) {
+    setEditingCommentId(comment.id);
+    setEditingCommentText(comment.content);
+  }
+
+  function handleCancelEdit() {
+    setEditingCommentId(null);
+    setEditingCommentText('');
+  }
+
+  async function handleSaveEdit(commentId: string) {
+    if (!editingCommentText.trim()) return;
+
+    try {
+      const response = await fetch(`/api/comments/${commentId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: editingCommentText.trim() }),
+      });
+      if (response.ok) {
+        const json = await response.json();
+        if (json.data?.comment) {
+          setComments((prev) =>
+            prev.map((c) =>
+              c.id === commentId
+                ? {
+                    ...c,
+                    content: json.data.comment.content,
+                    isEdited: true,
+                    updatedAt: json.data.comment.updatedAt,
+                  }
+                : c,
+            ),
+          );
+          setEditingCommentId(null);
+          return;
+        }
+      }
+    } catch {
+      // Fallback
+    }
+
+    setComments((prev) =>
+      prev.map((c) =>
+        c.id === commentId
+          ? {
+              ...c,
+              content: editingCommentText.trim(),
+              isEdited: true,
+              updatedAt: new Date().toISOString(),
+            }
+          : c,
+      ),
+    );
+    setEditingCommentId(null);
+  }
+
+  async function handleDeleteComment(commentId: string) {
+    try {
+      await fetch(`/api/comments/${commentId}`, { method: 'DELETE' });
+    } catch {
+      // Fallback
+    }
+    setComments((prev) => prev.filter((c) => c.id !== commentId));
   }
 
   const statusMessage =
@@ -811,6 +984,140 @@ export default function HomePage() {
                   </div>
                 ))}
               </article>
+            </section>
+
+            {/* 4. Live Incident Collaboration & Comments */}
+            <section className="comments-section" aria-labelledby="comments-title">
+              <div className="comments-header">
+                <h3 id="comments-title">
+                  <span>💬 Incident Collaboration & Operator Notes</span>
+                  <span className="comments-count-pill">{comments.length} notes</span>
+                </h3>
+                <span style={{ fontSize: '0.75rem', color: 'var(--muted)' }}>
+                  Author / Role-verified · Immutable audit log attached
+                </span>
+              </div>
+
+              {/* Comment Composer */}
+              <form className="comment-composer-card" onSubmit={handleCreateComment}>
+                <textarea
+                  className="comment-textarea"
+                  placeholder="Post an investigation update, rail status, or remediation note..."
+                  value={newCommentText}
+                  onChange={(e) => setNewCommentText(e.target.value)}
+                  maxLength={2000}
+                />
+                <div className="composer-footer">
+                  <span className="comment-char-count">{newCommentText.length} / 2000 chars</span>
+                  <button
+                    type="submit"
+                    className="primary-button"
+                    style={{
+                      padding: '6px 14px',
+                      fontSize: '0.8rem',
+                      background: '#74cfb8',
+                      color: '#16221f',
+                    }}
+                    disabled={!newCommentText.trim() || isSubmittingComment}
+                  >
+                    {isSubmittingComment ? 'Posting...' : 'Post Note +'}
+                  </button>
+                </div>
+              </form>
+
+              {/* Comments Feed */}
+              <div className="comments-thread">
+                {comments.map((comment) => {
+                  const isEditing = editingCommentId === comment.id;
+                  const initials = comment.user?.name
+                    ? comment.user.name
+                        .split(' ')
+                        .map((n) => n[0])
+                        .join('')
+                        .slice(0, 2)
+                        .toUpperCase()
+                    : 'OP';
+                  const timeFormatted = new Date(comment.createdAt).toLocaleTimeString([], {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  });
+
+                  return (
+                    <article className="comment-card" key={comment.id}>
+                      <div className="comment-card-top">
+                        <div className="comment-author-meta">
+                          <span className="comment-avatar" aria-hidden="true">
+                            {initials}
+                          </span>
+                          <span className="comment-author-name">
+                            {comment.user?.name ?? 'Operator'}
+                          </span>
+                          <span className="comment-timestamp">{timeFormatted}</span>
+                          {comment.isEdited && (
+                            <span className="comment-edited-badge">(edited)</span>
+                          )}
+                        </div>
+
+                        {!isEditing && (
+                          <div className="comment-actions-bar">
+                            <button
+                              type="button"
+                              className="comment-action-btn"
+                              onClick={() => handleStartEdit(comment)}
+                              aria-label="Edit comment"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              type="button"
+                              className="comment-action-btn btn-delete"
+                              onClick={() => handleDeleteComment(comment.id)}
+                              aria-label="Delete comment"
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        )}
+                      </div>
+
+                      {isEditing ? (
+                        <div className="comment-edit-box">
+                          <textarea
+                            className="comment-textarea"
+                            value={editingCommentText}
+                            onChange={(e) => setEditingCommentText(e.target.value)}
+                            maxLength={2000}
+                          />
+                          <div className="comment-edit-actions">
+                            <button
+                              type="button"
+                              className="quiet-button"
+                              onClick={handleCancelEdit}
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              type="button"
+                              className="primary-button"
+                              style={{
+                                padding: '4px 10px',
+                                fontSize: '0.75rem',
+                                background: '#74cfb8',
+                                color: '#16221f',
+                              }}
+                              onClick={() => handleSaveEdit(comment.id)}
+                            >
+                              Save Changes
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <p className="comment-body-text">{comment.content}</p>
+                      )}
+                    </article>
+                  );
+                })}
+              </div>
             </section>
           </div>
         )}

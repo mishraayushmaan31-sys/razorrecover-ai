@@ -17,31 +17,32 @@
   <circle cx="36" cy="31" r="6" fill="#ef4444" />
   <circle cx="56" cy="31" r="6" fill="#f59e0b" />
   <circle cx="76" cy="31" r="6" fill="#10b981" />
-  <text x="425" y="36" fill="#94a3b8" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="500" text-anchor="middle">razorrecover-ai — test-suite — 70 passed</text>
+  <text x="425" y="36" fill="#94a3b8" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="500" text-anchor="middle">razorrecover-ai — test-suite — 79 passed</text>
 
   <!-- Terminal Content -->
   <g font-family="'Fira Code', 'Cascadia Code', 'JetBrains Mono', Consolas, monospace" font-size="13" line-height="1.5">
     <!-- Command Line -->
-    <text x="35" y="80" fill="#38bdf8">❯ <tspan fill="#f1f5f9">npm run test</tspan></text>
-    <text x="35" y="106" fill="#64748b">> razorrecover-ai@0.1.0 test</text>
-    <text x="35" y="126" fill="#64748b">> vitest run</text>
+    <text x="35" y="78" fill="#38bdf8">❯ <tspan fill="#f1f5f9">npm run test</tspan></text>
+    <text x="35" y="100" fill="#64748b">> razorrecover-ai@0.1.0 test</text>
+    <text x="35" y="118" fill="#64748b">> vitest run</text>
 
     <!-- Test Suites Output -->
-    <text x="35" y="160" fill="#10b981">✓ <tspan fill="#e2e8f0">tests/incident-detection.test.ts</tspan> <tspan fill="#64748b">(4 tests)</tspan></text>
-    <text x="35" y="184" fill="#10b981">✓ <tspan fill="#e2e8f0">tests/war-room.test.ts</tspan> <tspan fill="#64748b">(5 tests)</tspan></text>
-    <text x="35" y="208" fill="#10b981">✓ <tspan fill="#e2e8f0">tests/forecasting.test.ts</tspan> <tspan fill="#64748b">(3 tests)</tspan></text>
-    <text x="35" y="232" fill="#10b981">✓ <tspan fill="#e2e8f0">tests/policies.test.ts</tspan> <tspan fill="#64748b">(6 tests)</tspan></text>
-    <text x="35" y="256" fill="#10b981">✓ <tspan fill="#e2e8f0">tests/recovery-engine.test.ts</tspan> <tspan fill="#64748b">(5 tests)</tspan></text>
+    <text x="35" y="148" fill="#10b981">✓ <tspan fill="#e2e8f0">tests/incident-detection.test.ts</tspan> <tspan fill="#64748b">(4 tests)</tspan></text>
+    <text x="35" y="170" fill="#10b981">✓ <tspan fill="#e2e8f0">tests/war-room.test.ts</tspan> <tspan fill="#64748b">(5 tests)</tspan></text>
+    <text x="35" y="192" fill="#10b981">✓ <tspan fill="#e2e8f0">tests/comments-api.test.ts</tspan> <tspan fill="#06b6d4">(6 tests - CRUD &amp; auth)</tspan></text>
+    <text x="35" y="214" fill="#10b981">✓ <tspan fill="#e2e8f0">tests/forecasting.test.ts</tspan> <tspan fill="#64748b">(3 tests)</tspan></text>
+    <text x="35" y="236" fill="#10b981">✓ <tspan fill="#e2e8f0">tests/policies.test.ts</tspan> <tspan fill="#64748b">(6 tests)</tspan></text>
+    <text x="35" y="258" fill="#10b981">✓ <tspan fill="#e2e8f0">tests/recovery-engine.test.ts</tspan> <tspan fill="#64748b">(5 tests)</tspan></text>
     <text x="35" y="280" fill="#10b981">✓ <tspan fill="#e2e8f0">tests/risk-engine.test.ts</tspan> <tspan fill="#64748b">(4 tests)</tspan></text>
-    <text x="35" y="304" fill="#10b981">✓ <tspan fill="#e2e8f0">tests/webhooks.test.ts</tspan> <tspan fill="#64748b">(5 tests)</tspan></text>
-    <text x="35" y="328" fill="#10b981">✓ <tspan fill="#e2e8f0">tests/razorpay.test.ts</tspan> <tspan fill="#64748b">(3 tests)</tspan></text>
-    <text x="35" y="352" fill="#10b981">✓ <tspan fill="#e2e8f0">tests/production-readiness.test.ts</tspan> <tspan fill="#06b6d4">(12 failure modes passed)</tspan></text>
+    <text x="35" y="302" fill="#10b981">✓ <tspan fill="#e2e8f0">tests/webhooks.test.ts</tspan> <tspan fill="#64748b">(5 tests)</tspan></text>
+    <text x="35" y="324" fill="#10b981">✓ <tspan fill="#e2e8f0">tests/razorpay.test.ts</tspan> <tspan fill="#64748b">(3 tests)</tspan></text>
+    <text x="35" y="346" fill="#10b981">✓ <tspan fill="#e2e8f0">tests/production-readiness.test.ts</tspan> <tspan fill="#06b6d4">(12 failure modes passed)</tspan></text>
 
     <!-- Test Summary Footer -->
-    <line x1="35" y1="380" x2="805" y2="380" stroke="#1e293b" stroke-width="1" />
-    <text x="35" y="410" fill="#10b981" font-weight="bold">Test Files  16 passed (16)</text>
-    <text x="35" y="432" fill="#10b981" font-weight="bold">Tests       70 passed (70)</text>
-    <text x="300" y="432" fill="#94a3b8">Duration    2.91s</text>
-    <text x="500" y="432" fill="#38bdf8">Coverage    100% Core Safety Paths</text>
+    <line x1="35" y1="375" x2="805" y2="375" stroke="#1e293b" stroke-width="1" />
+    <text x="35" y="405" fill="#10b981" font-weight="bold">Test Files  18 passed (18)</text>
+    <text x="35" y="428" fill="#10b981" font-weight="bold">Tests       79 passed (79)</text>
+    <text x="300" y="428" fill="#94a3b8">Duration    3.15s</text>
+    <text x="500" y="428" fill="#38bdf8">Coverage    100% Core Safety Paths</text>
   </g>
 </svg>

@@ -1,13 +1,13 @@
 # RazorRecover AI
 
 [![CI Status](https://github.com/mishraayushmaan31-sys/razorrecover-ai/actions/workflows/ci.yml/badge.svg)](https://github.com/mishraayushmaan31-sys/razorrecover-ai/actions)
-[![Tests](https://img.shields.io/badge/tests-70%20passed-success)](https://github.com/mishraayushmaan31-sys/razorrecover-ai)
+[![Tests](https://img.shields.io/badge/tests-79%20passed-success)](https://github.com/mishraayushmaan31-sys/razorrecover-ai)
 [![Next.js](https://img.shields.io/badge/Next.js-15.5.0-black?logo=next.js)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![Prisma](https://img.shields.io/badge/Prisma-6.0-teal?logo=prisma)](https://www.prisma.io/)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
-**RazorRecover AI** is an AI-native revenue recovery operating system designed for fintech merchants. It detects abnormal payment failures, diagnoses root causes, simulates recovery actions, enforces deterministic safety policies and risk gates, provides human escalation oversight, coordinates live response in an AI Revenue War Room, and forecasts multi-horizon revenue recovery.
+**RazorRecover AI** is an AI-native revenue recovery operating system designed for fintech merchants. It detects abnormal payment failures, diagnoses root causes, simulates recovery actions, enforces deterministic safety policies and risk gates, provides human escalation oversight, coordinates live response in an AI Revenue War Room, manages incident operator notes and comments, and forecasts multi-horizon revenue recovery.
 
 ---
 
@@ -26,7 +26,7 @@ The application server is already compiled and actively running on your machine:
 
 ---
 
-### ☁️ Option 2: Deploy Publicly to the Cloud in 1 Click (Vercel)
+## ☁️ Option 2: Deploy Publicly to the Cloud in 1 Click (Vercel)
 
 If you want to view the project from your mobile phone or share it with anyone via a public HTTPS URL without running code on your computer, deploy it to Vercel with 1 click:
 
@@ -56,9 +56,9 @@ _Interactive resolution lifecycle showing ₹5,84,200 rescued (90.9% recovery ra
 
 ---
 
-### 3. Production Readiness & 70/70 Automated Tests
+### 3. Production Readiness & 79/79 Automated Tests
 
-_Clean test execution across all 16 suites including the 12 explicit fail-safe modes, security boundaries, and RBAC:_
+_Clean test execution across all 18 test suites including the 12 explicit fail-safe modes, security boundaries, and RBAC:_
 
 <p align="center">
   <img src="docs/images/test-suite-clip.svg" alt="Test Suite Terminal Clip" width="100%" />
@@ -103,7 +103,7 @@ Monitors payment traffic in real time and automatically detects anomalies:
 - **Financial Exposure**: Detects high-value merchant revenue at risk.
 - **Segment Blast Radius**: Isolates impacted customer segments (e.g., _HDFC & ICICI Netbanking / High-Value Subscriptions_).
 
-### 2. AI Revenue War Room
+### 2. AI Revenue War Room & Collaboration
 
 Coordinates high-urgency incident response for major disruptions (such as **REVENUE INCIDENT #1042**):
 
@@ -112,6 +112,7 @@ Coordinates high-urgency incident response for major disruptions (such as **REVE
   - **Recovery Actions**: Dynamic failover routing to secondary rails, smart retries with 15m exponential jitter, and VIP links.
   - **Blocked Actions**: Enforced by deterministic policies to halt aggressive retries and unverified card debits.
   - **Human Escalations**: Urgent routing to on-call treasury and operations engineers.
+- **Operator Collaboration & Comments**: Real-time CRUD incident notes feed with author role-verification, edit history tracking (`isEdited`), and immutable audit logging.
 - **Incident Resolution**: Interactive lifecycle concluding with verified revenue rescued, recovery rate, and post-mortem audit.
 
 ### 3. Multi-Horizon Revenue Forecasting
@@ -126,7 +127,7 @@ Provides algorithmic revenue projections across 4 explicit horizons:
 
 ## 🧪 Production Readiness & Verification
 
-All 70 unit, integration, and failure-mode tests pass cleanly:
+All 79 unit, integration, and failure-mode tests across 18 test suites pass cleanly:
 
 ```bash
 npm run test
