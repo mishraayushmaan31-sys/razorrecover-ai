@@ -343,6 +343,8 @@ model User {
   recommendations AIRecommendation[]
   actions         RecoveryAction[]
   experiments     RecoveryExperiment[]
+  comments        Comment[]
+  issues          Issue[]
 
   @@unique([merchantId, email])
   @@index([merchantId, status])
@@ -650,6 +652,7 @@ model Incident {
   merchant      Merchant              @relation(fields: [merchantId], references: [id], onDelete: Cascade)
   customer      Customer?             @relation(fields: [customerId], references: [id], onDelete: SetNull)
   opportunities RecoveryOpportunity[]
+  comments      Comment[]
 
   @@index([merchantId, status, createdAt])
 }
@@ -911,4 +914,43 @@ model Notification {
   user     User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@index([merchantId, status, createdAt])
+}
+
+model Issue {
+  id          String    @id @default(uuid())
+  merchantId  String?
+  title       String
+  description String?
+  status      String    @default("OPEN")
+  priority    String    @default("MEDIUM")
+  createdById String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  user        User?     @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  comments    Comment[]
+
+  @@index([status, createdAt])
+  @@index([createdById])
+}
+
+model Comment {
+  id         String    @id @default(uuid())
+  content    String
+  isEdited   Boolean   @default(false)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  issueId    String
+  issue      Issue     @relation(fields: [issueId], references: [id], onDelete: Cascade)
+
+  incidentId String?
+  incident   Incident? @relation(fields: [incidentId], references: [id], onDelete: SetNull)
+
+  @@index([issueId, createdAt])
+  @@index([userId, createdAt])
+  @@index([incidentId, createdAt])
 }
