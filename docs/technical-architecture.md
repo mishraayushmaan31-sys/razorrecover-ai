@@ -5,6 +5,7 @@
 This system is designed to ensure that AI augments decision-making without bypassing deterministic controls.
 
 ### Core rule
+
 AI Recommendation
 → Deterministic Business Logic
 → Policy Engine
@@ -15,6 +16,7 @@ AI Recommendation
 → Revenue Ledger
 
 ### Mandatory constraints
+
 - The AI layer never directly executes money movement.
 - No frontend access to Razorpay secrets.
 - All AI outputs are validated server-side.
@@ -31,6 +33,7 @@ AI Recommendation
 RazorRecover AI is a multi-layer fintech platform with a frontend application, backend services, policy and execution engine, payment provider boundary, and observability stack.
 
 ### High-level layers
+
 - Presentation layer: Next.js frontend
 - API layer: backend REST APIs and internal service interfaces
 - Core business layer: risk engine, policy engine, approval orchestration, execution service, analytics, ledger
@@ -44,6 +47,7 @@ RazorRecover AI is a multi-layer fintech platform with a frontend application, b
 ## 3. Frontend architecture
 
 ### Recommended stack
+
 - Next.js App Router
 - TypeScript
 - React
@@ -51,6 +55,7 @@ RazorRecover AI is a multi-layer fintech platform with a frontend application, b
 - shadcn/ui or equivalent
 
 ### Frontend structure
+
 - app/
   - (auth)/
   - (dashboard)/
@@ -80,6 +85,7 @@ RazorRecover AI is a multi-layer fintech platform with a frontend application, b
   - useApprovalQueue
 
 ### Frontend responsibilities
+
 - render merchant dashboard and operational surfaces
 - display risk, incident, and approval states
 - surface AI recommendation panels with evidence and policy status
@@ -88,11 +94,13 @@ RazorRecover AI is a multi-layer fintech platform with a frontend application, b
 - clearly show Demo / Test / Production mode
 
 ### Frontend non-goals
+
 - directly invoking money movement
 - direct communication with Razorpay secrets
 - direct access to privileged security operations
 
 ### Frontend request model
+
 - all mutation calls go through backend APIs
 - all financial actions are initiated through server-only orchestration
 - all UI state updates are driven by server response plus ledger status
@@ -104,6 +112,7 @@ RazorRecover AI is a multi-layer fintech platform with a frontend application, b
 ### Service-oriented backend model
 
 #### Core internal services
+
 - merchant-service
 - risk-service
 - policy-service
@@ -119,6 +128,7 @@ RazorRecover AI is a multi-layer fintech platform with a frontend application, b
 - analytics-service
 
 ### Backend boundaries
+
 - API layer: routes and schema validation
 - Service layer: business logic
 - Domain layer: entities and rules
@@ -126,6 +136,7 @@ RazorRecover AI is a multi-layer fintech platform with a frontend application, b
 - Persistence layer: Prisma + Postgres
 
 ### Execution chain
+
 1. API receives a request or event
 2. Request is validated and authenticated
 3. Request context is resolved
@@ -143,10 +154,12 @@ RazorRecover AI is a multi-layer fintech platform with a frontend application, b
 ## 5. Database architecture
 
 ### Database technology
+
 - PostgreSQL
 - Prisma ORM
 
 ### Core data domains
+
 - merchants
 - users
 - permissions and roles
@@ -164,6 +177,7 @@ RazorRecover AI is a multi-layer fintech platform with a frontend application, b
 - AI memory
 
 ### Recommended schema groups
+
 - auth/
 - merchant/
 - payments/
@@ -176,7 +190,9 @@ RazorRecover AI is a multi-layer fintech platform with a frontend application, b
 - experiments/
 
 ### Transaction requirements
+
 The following operations require transactions:
+
 - approval decisions tied to ledger mutation
 - execution record creation plus ledger posting
 - payment-recovery action processing that updates multiple tables atomically
@@ -184,12 +200,14 @@ The following operations require transactions:
 - webhook event state transitions that must be deduplicated and recorded transactionally
 
 ### Non-transactional operations
+
 - analytics summarization
 - ai recommendation retrieval
 - event ingestion fan-out where eventual consistency is acceptable
 - read-heavy dashboard queries
 
 ### Data segregation rules
+
 - demo data table prefixes or environment labels
 - test-mode records clearly marked with mode metadata
 - production data isolated by environment and deployment boundary
@@ -199,18 +217,21 @@ The following operations require transactions:
 ## 6. API architecture
 
 ### API style
+
 - REST for merchant/operator flows
 - webhook endpoint for provider callbacks
 - internal service-to-service APIs in structured JSON
 - server-side validation on every request
 
 ### API layers
+
 - public APIs: merchant and dashboard access
 - internal APIs: backend-to-backend interactions
 - provider APIs: Razorpay integration boundary only
 - webhook APIs: provider callbacks and verification endpoints
 
 ### API categories
+
 - Auth APIs
 - Risk APIs
 - Recovery APIs
@@ -224,6 +245,7 @@ The following operations require transactions:
 - Developer APIs
 
 ### API contract principles
+
 - typed request/response objects
 - explicit enumeration for mode and state
 - idempotency keys on financial and recovery endpoints
@@ -235,9 +257,11 @@ The following operations require transactions:
 ## 7. AI architecture
 
 ### AI architecture goal
+
 The AI layer supports reasoning, summarization, and recommendation generation without being the enforcement point for financial action.
 
 ### AI stack
+
 - provider abstraction layer
 - structured output schema
 - validation before persistence or response
@@ -245,6 +269,7 @@ The AI layer supports reasoning, summarization, and recommendation generation wi
 - no direct account or payments mutation
 
 ### AI pipeline
+
 - context assembly
 - risk and opportunity retrieval
 - prompt generation
@@ -255,6 +280,7 @@ The AI layer supports reasoning, summarization, and recommendation generation wi
 - human approval if required
 
 ### AI responsibilities
+
 - explain risk and failure cause
 - summarize recovery opportunity
 - recommend safe next actions
@@ -262,12 +288,14 @@ The AI layer supports reasoning, summarization, and recommendation generation wi
 - produce decision rationale with confidence score
 
 ### AI non-responsibilities
+
 - direct money movement
 - bypassing policy engine
 - making final financial execution decisions
 - direct access to secrets or provider credentials
 
 ### AI safety validation
+
 - schema validation is required
 - confidence threshold checks for recommendation quality
 - risk classification and policy compatibility checks
@@ -278,7 +306,9 @@ The AI layer supports reasoning, summarization, and recommendation generation wi
 ## 8. Agent architecture
 
 ### Purpose of agents
+
 Agents are orchestration components that coordinate specialized tasks such as:
+
 - recommendation generation
 - policy evaluation
 - execution flow orchestration
@@ -287,6 +317,7 @@ Agents are orchestration components that coordinate specialized tasks such as:
 - recovery workflow support
 
 ### Agent categories
+
 - Research / recommendation agent
 - Risk evaluation agent
 - Recovery strategy agent
@@ -296,6 +327,7 @@ Agents are orchestration components that coordinate specialized tasks such as:
 - Developer event inspection agent
 
 ### Agent guardrails
+
 - agents do not directly execute provider actions
 - agent outputs are passed to deterministic logic for final enforcement
 - all actions require traces and approvals if required by policy
@@ -306,6 +338,7 @@ Agents are orchestration components that coordinate specialized tasks such as:
 ## 9. Queue and event architecture
 
 ### Synchronous operations
+
 - authentication
 - policy evaluation requests
 - read access queries
@@ -313,6 +346,7 @@ Agents are orchestration components that coordinate specialized tasks such as:
 - dashboard summary fetch
 
 ### Asynchronous operations
+
 - incident correlation
 - webhook processing fan-out
 - AI recommendation generation
@@ -323,6 +357,7 @@ Agents are orchestration components that coordinate specialized tasks such as:
 - experiment evaluation and learning loops
 
 ### Recommended queue system
+
 - Redis / queue service or managed message service
 - topics or queues for events such as:
   - payment.failed
@@ -335,6 +370,7 @@ Agents are orchestration components that coordinate specialized tasks such as:
   - ai.recommendation.generated
 
 ### Event handling rules
+
 - events must be idempotent at the consumer level
 - duplicate events must be deduplicated through unique event identifiers
 - event processing should be retriable and durable
@@ -345,9 +381,11 @@ Agents are orchestration components that coordinate specialized tasks such as:
 ## 10. Webhook architecture
 
 ### Webhook goal
+
 Process Razorpay callbacks safely and react to payment states without allowing unverified external events to mutate business state.
 
 ### Handler flow
+
 1. provider sends signed webhook payload
 2. backend verifies signature using configured secret
 3. event payload is parsed and validated
@@ -357,6 +395,7 @@ Process Razorpay callbacks safely and react to payment states without allowing u
 7. downstream services update payment / risk / ledger state
 
 ### Security requirements
+
 - verify signature before processing any event
 - reject unsigned or altered requests
 - deduplicate by event ID or signature hash
@@ -364,6 +403,7 @@ Process Razorpay callbacks safely and react to payment states without allowing u
 - no frontend access to webhook secrets
 
 ### Idempotency boundaries
+
 - webhook processing must be idempotent by event ID
 - execution operations triggered by webhook must also be idempotent by recovery or payment action key
 
@@ -372,18 +412,21 @@ Process Razorpay callbacks safely and react to payment states without allowing u
 ## 11. Authentication architecture
 
 ### Authentication types
+
 - merchant user login
 - admin / operator role sign-in
 - service-to-service authentication for internal APIs
 - provider authentication handled server-side
 
 ### Recommended implementation
+
 - NextAuth-compatible or secure auth provider for Next.js
 - JWT or session-based server auth
 - secure cookie or token strategy
 - short-lived access tokens with refresh flow
 
 ### Principles
+
 - no credentials in frontend code
 - environment-based secret management
 - least privilege at every route and service boundary
@@ -393,6 +436,7 @@ Process Razorpay callbacks safely and react to payment states without allowing u
 ## 12. Authorization and RBAC
 
 ### Roles
+
 - Merchant Admin
 - Merchant Operator
 - Revenue Analyst
@@ -403,9 +447,11 @@ Process Razorpay callbacks safely and react to payment states without allowing u
 - Support User
 
 ### Permission model
+
 Permissions are granted by role and scoped by merchant and environment.
 
 #### Examples
+
 - view:risk
 - create:recovery_simulation
 - approve:recovery_action
@@ -416,6 +462,7 @@ Permissions are granted by role and scoped by merchant and environment.
 - manage:integration_config
 
 ### Authorization boundaries
+
 - route-level checks in frontend and backend
 - server-side authorization on every sensitive action
 - environment-aware permission enforcement
@@ -426,6 +473,7 @@ Permissions are granted by role and scoped by merchant and environment.
 ## 13. Security boundaries
 
 ### Inbound boundaries
+
 - frontend to API
 - API to core services
 - internal services to database
@@ -433,6 +481,7 @@ Permissions are granted by role and scoped by merchant and environment.
 - external provider to internal integration layer
 
 ### Security controls
+
 - TLS everywhere
 - signed webhooks
 - env-based secrets and secret manager preference for production
@@ -442,6 +491,7 @@ Permissions are granted by role and scoped by merchant and environment.
 - no direct database access from frontend
 
 ### Security zones
+
 - public zone: landing page, auth endpoints
 - merchant zone: dashboard, risk, recovery actions
 - admin zone: approvals, policies, security, kill switch
@@ -453,12 +503,14 @@ Permissions are granted by role and scoped by merchant and environment.
 ## 14. Logging, audit, and observability
 
 ### Logging
+
 - structured JSON logs
 - correlated request IDs
 - operator and approver IDs attached when available
 - include environment and mode
 
 ### Audit trail
+
 - immutable or append-only action history
 - approval decisions
 - policy decisions
@@ -468,12 +520,14 @@ Permissions are granted by role and scoped by merchant and environment.
 - risk and recovery event provenance
 
 ### Observability stack
+
 - log aggregation
 - metrics dashboards
 - tracing for request lifecycle
 - alerting on failed policies, execution issues, payment anomalies, and webhook failures
 
 ### Required observability signals
+
 - revenue at risk counts
 - active approvals
 - blocked actions
@@ -487,9 +541,11 @@ Permissions are granted by role and scoped by merchant and environment.
 ## 15. Demo Mode architecture
 
 ### Purpose
+
 Provide safe synthetic demonstration of the end-user workflow without risking financial operations or confusing synthetic data with real data.
 
 ### Demo mode rules
+
 - synthetic merchant and transaction data only
 - explicit mode tagging in UI and APIs
 - no use of real payment or provider credentials
@@ -497,6 +553,7 @@ Provide safe synthetic demonstration of the end-user workflow without risking fi
 - all demo actions stay within the demo environment and ledger path
 
 ### Demo mode boundaries
+
 - can execute simulation or synthetic recovery actions
 - cannot trigger actual financial actions with external providers
 - must be clearly visible to every user
@@ -506,9 +563,11 @@ Provide safe synthetic demonstration of the end-user workflow without risking fi
 ## 16. Razorpay integration boundary
 
 ### Integration boundary design
+
 All Razorpay logic must live in a server-side integration boundary.
 
 ### Scope of the boundary
+
 - Razorpay client configuration
 - payment event validation
 - webhook verification
@@ -516,12 +575,14 @@ All Razorpay logic must live in a server-side integration boundary.
 - provider event translation to internal domain events
 
 ### Out of scope for frontend
+
 - secrets
 - direct payment operations
 - webhook secret usage
 - direct API calls with privileged credentials
 
 ### Integration flow
+
 - frontend requests a server action for a safe operation
 - backend calls a Razorpay service in test or demo mode
 - provider response is normalized into internal event types
@@ -532,11 +593,13 @@ All Razorpay logic must live in a server-side integration boundary.
 ## 17. Transaction boundaries and idempotency
 
 ### Required transaction boundaries
+
 - create approval + write audit log + update action state
 - create recovery execution + update execution status + ledger entry
 - persist webhook event + mark deduplication state + queue downstream processing
 
 ### Idempotency keys
+
 - recovery action execution
 - approval actions
 - webhook event processing
@@ -544,6 +607,7 @@ All Razorpay logic must live in a server-side integration boundary.
 - ledger updates triggered by state changes
 
 ### Key design rule
+
 Every operation that changes revenue or financial state must be protected by an idempotency key and a unique business operation ID.
 
 ---
@@ -551,6 +615,7 @@ Every operation that changes revenue or financial state must be protected by an 
 ## 18. Synchronous vs asynchronous operation map
 
 ### Synchronous operations
+
 - login / auth validation
 - read merchant dashboard state
 - risk summary fetch
@@ -559,6 +624,7 @@ Every operation that changes revenue or financial state must be protected by an 
 - fetching audit or ledger records for a visible page
 
 ### Asynchronous operations
+
 - AI recommendation generation
 - payment webhook processing
 - incident correlation and aggregation
@@ -598,6 +664,7 @@ flowchart LR
 ## 20. Data flow description
 
 ### Normal risk and recovery flow
+
 - merchant or operator triggers dashboard request
 - backend loads risk context and similar records
 - AI suggests a strategy
@@ -610,6 +677,7 @@ flowchart LR
 - ledger records the result and audit logs the process
 
 ### Critical rule
+
 The AI layer may suggest, but the business logic and execution services decide and act.
 
 ---
@@ -617,6 +685,7 @@ The AI layer may suggest, but the business logic and execution services decide a
 ## 21. Implementation foundation for next phase
 
 The next phase should implement only the foundational technical architecture necessary to support product development:
+
 - Next.js app shell
 - backend service structure
 - Prisma schema foundation

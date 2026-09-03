@@ -69,7 +69,6 @@ jobs:
           aws ecs wait services-stable \
             --cluster razorrecover-${{ github.event.inputs.environment || 'production' }}-cluster \
             --services razorrecover-${{ github.event.inputs.environment || 'production' }}-service
-          
+
           echo "Verifying endpoint health..."
           curl --fail --retry 5 --retry-delay 5 https://${{ vars.APP_DOMAIN }}/api/health || exit 1
-

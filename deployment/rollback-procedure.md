@@ -6,11 +6,11 @@ This document provides exact, step-by-step procedures to revert an unhealthy rel
 
 ## 1. Quick Decision Matrix
 
-| Severity | Incident Symptom | Action | Target RTO |
-| :--- | :--- | :--- | :--- |
-| **P0** | Health check fails on `/api/health`, 5xx spike > 5%, or DB connectivity lost | Immediate ECS Task Rollback | < 3 minutes |
-| **P1** | Erroneous UI display or non-critical background worker crash | ECS Task Rollback to previous tag | < 10 minutes |
-| **P0-Data** | Bad database migration applied affecting ledger or transaction tables | Restore RDS Snapshot to Point-in-Time | < 25 minutes |
+| Severity    | Incident Symptom                                                             | Action                                | Target RTO   |
+| :---------- | :--------------------------------------------------------------------------- | :------------------------------------ | :----------- |
+| **P0**      | Health check fails on `/api/health`, 5xx spike > 5%, or DB connectivity lost | Immediate ECS Task Rollback           | < 3 minutes  |
+| **P1**      | Erroneous UI display or non-critical background worker crash                 | ECS Task Rollback to previous tag     | < 10 minutes |
+| **P0-Data** | Bad database migration applied affecting ledger or transaction tables        | Restore RDS Snapshot to Point-in-Time | < 25 minutes |
 
 ---
 
@@ -49,12 +49,13 @@ curl -f https://app.razorrecover.com/api/health
 If a migration introduced a breaking schema defect:
 
 1. **Down-Migration via Prisma**:
+
    ```bash
    npx prisma migrate diff \
      --from-schema-datamodel prisma/schema.prisma \
      --to-migrations prisma/migrations \
      --script > rollback.sql
-   
+
    # Review and apply rollback.sql against database
    npx prisma db execute --file rollback.sql
    ```
@@ -68,4 +69,3 @@ If a migration introduced a breaking schema defect:
      --restore-time 2026-09-03T08:00:00.000Z \
      --db-subnet-group-name razorrecover-production-db-subnet
    ```
-

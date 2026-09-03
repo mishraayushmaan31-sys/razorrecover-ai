@@ -5,10 +5,7 @@ import {
   detectRevenueIncident,
   type RevenueIncidentDetectionResult,
 } from '@/server/services/incident-detection-service';
-import {
-  getCanonicalWarRoomData,
-  type WarRoomDetails,
-} from '@/server/services/war-room-service';
+import { getCanonicalWarRoomData, type WarRoomDetails } from '@/server/services/war-room-service';
 import {
   generateRevenueForecast,
   type RevenueForecastResult,
@@ -258,7 +255,8 @@ export default function HomePage() {
                   <span>being protected.</span>
                 </h1>
                 <p className="hero-copy">
-                  A focused view of what is at risk, what can be rescued, and what needs your attention next.
+                  A focused view of what is at risk, what can be rescued, and what needs your
+                  attention next.
                 </p>
               </div>
               <div className="hero-score" aria-label="Revenue Recovery Score 92 out of 100">
@@ -323,11 +321,7 @@ export default function HomePage() {
                         : 'STANDBY'}
                   </span>
                 </div>
-                <div
-                  className="workflow-track"
-                  role="list"
-                  aria-label="Recovery workflow progress"
-                >
+                <div className="workflow-track" role="list" aria-label="Recovery workflow progress">
                   {workflow.map((step, index) => {
                     const active = index === currentStep && running;
                     const complete = index < currentStep || flowState === 'complete';
@@ -445,9 +439,11 @@ export default function HomePage() {
                 </p>
                 <h2>REVENUE INCIDENT #1042</h2>
                 <p>
-                  Payment Success: {warRoom.paymentSuccess.normal} → {warRoom.paymentSuccess.current}
+                  Payment Success: {warRoom.paymentSuccess.normal} →{' '}
+                  {warRoom.paymentSuccess.current}
                   <br />
-                  Revenue at Risk: <strong>{warRoom.revenueAtRisk}</strong> · AI Confidence: <strong>94%</strong>
+                  Revenue at Risk: <strong>{warRoom.revenueAtRisk}</strong> · AI Confidence:{' '}
+                  <strong>94%</strong>
                 </p>
                 <div style={{ marginTop: '16px' }}>
                   <button
@@ -469,9 +465,7 @@ export default function HomePage() {
         {activeView === 'war-room' && (
           <div className="war-room-container">
             {/* Header Banner */}
-            <header
-              className={`war-room-banner ${warRoom.isResolved ? 'resolved-theme' : ''}`}
-            >
+            <header className={`war-room-banner ${warRoom.isResolved ? 'resolved-theme' : ''}`}>
               <div className="war-room-title-area">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <span
@@ -484,7 +478,8 @@ export default function HomePage() {
                 </div>
                 <h2>AI REVENUE WAR ROOM</h2>
                 <p style={{ margin: 0, color: '#c9d6cf', fontSize: '0.92rem' }}>
-                  REVENUE INCIDENT #1042 · High-Value Netbanking & Recurring Subscription Degradation
+                  REVENUE INCIDENT #1042 · High-Value Netbanking & Recurring Subscription
+                  Degradation
                 </p>
               </div>
 
@@ -500,11 +495,7 @@ export default function HomePage() {
                     {isResolving ? 'Resolving incident...' : 'RESOLVE INCIDENT ✓'}
                   </button>
                 ) : (
-                  <button
-                    type="button"
-                    className="quiet-button"
-                    onClick={handleResetIncident}
-                  >
+                  <button type="button" className="quiet-button" onClick={handleResetIncident}>
                     Reopen for Testing ↻
                   </button>
                 )}
@@ -525,7 +516,8 @@ export default function HomePage() {
                       fontFamily: 'Space Grotesk, sans-serif',
                     }}
                   >
-                    Resolved at {new Date(warRoom.resolution.resolvedAt).toLocaleTimeString()} · Verified by AI Safety Gate
+                    Resolved at {new Date(warRoom.resolution.resolvedAt).toLocaleTimeString()} ·
+                    Verified by AI Safety Gate
                   </span>
                 </div>
 
@@ -538,15 +530,11 @@ export default function HomePage() {
                   </div>
                   <div className="resolution-stat-card">
                     <div className="resolution-stat-label">Recovery Rate</div>
-                    <div className="resolution-stat-num">
-                      {warRoom.resolution.recoveryRate}
-                    </div>
+                    <div className="resolution-stat-num">{warRoom.resolution.recoveryRate}</div>
                   </div>
                   <div className="resolution-stat-card">
                     <div className="resolution-stat-label">Automatic Actions</div>
-                    <div className="resolution-stat-num">
-                      {warRoom.resolution.automaticActions}
-                    </div>
+                    <div className="resolution-stat-num">{warRoom.resolution.automaticActions}</div>
                   </div>
                   <div className="resolution-stat-card">
                     <div className="resolution-stat-label">Human Escalations</div>
@@ -715,9 +703,7 @@ export default function HomePage() {
                     <p className="eyebrow">CHRONOLOGY</p>
                     <h2>Timeline</h2>
                   </div>
-                  <span className="status-pill">
-                    {warRoom.timeline.length} EVENTS RECORDED
-                  </span>
+                  <span className="status-pill">{warRoom.timeline.length} EVENTS RECORDED</span>
                 </div>
 
                 <div className="timeline-list">
@@ -947,9 +933,9 @@ export default function HomePage() {
               <span className="forecast-tag-pill">PREDICTION / ESTIMATE</span>
               <p className="forecast-disclaimer-text">
                 <strong>Important Notice:</strong> Revenue forecasts are probabilistic estimates
-                generated by the algorithmic forecasting service. Projections account for historical run
-                rates, current incident degradation curves, and active recovery mitigations. All figures
-                are clearly labeled as predictions/estimates.
+                generated by the algorithmic forecasting service. Projections account for historical
+                run rates, current incident degradation curves, and active recovery mitigations. All
+                figures are clearly labeled as predictions/estimates.
               </p>
             </div>
 
@@ -1027,10 +1013,11 @@ export default function HomePage() {
                 <span className="status-pill status-complete">90.9% PROJECTED RECOVERY</span>
               </div>
               <p style={{ color: 'var(--muted)', fontSize: '0.84rem' }}>
-                With automated gateway traffic failover and jittered retry schedules active, the system
-                estimates rescuing <strong>{forecast.summary24h.totalEstimatedRescue}</strong> out of{' '}
-                <strong>{forecast.summary24h.totalRevenueAtRisk}</strong> total projected 24-hour risk
-                exposure (Prediction / Estimate).
+                With automated gateway traffic failover and jittered retry schedules active, the
+                system estimates rescuing{' '}
+                <strong>{forecast.summary24h.totalEstimatedRescue}</strong> out of{' '}
+                <strong>{forecast.summary24h.totalRevenueAtRisk}</strong> total projected 24-hour
+                risk exposure (Prediction / Estimate).
               </p>
             </article>
           </section>

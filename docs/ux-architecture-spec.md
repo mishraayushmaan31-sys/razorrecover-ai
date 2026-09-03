@@ -5,6 +5,7 @@
 This UX is designed for an enterprise fintech operating environment. It must feel premium, trustworthy, minimal, fast, and operationally clear.
 
 Core UX principles:
+
 - help users act decisively on revenue risk
 - emphasize signal over noise
 - keep AI recommendations explainable
@@ -19,6 +20,7 @@ Core UX principles:
 ## 2. Product UX goals
 
 The user experience should allow a merchant operations team to:
+
 - identify revenue loss quickly
 - understand the reason behind the loss
 - determine which recovery options are safe
@@ -32,6 +34,7 @@ The user experience should allow a merchant operations team to:
 ## 3. Sitemap
 
 ### Primary sitemap
+
 - Landing Page
 - Authentication
 - Onboarding
@@ -70,6 +73,7 @@ The user experience should allow a merchant operations team to:
 - Security
 
 ### Information hierarchy
+
 - Top-level operational surfaces: Command Center, Recovery Center, Customers, AI Copilot, Forecast, Analytics, Incidents, War Room
 - Admin and governance surfaces: Policies, Audit Ledger, Security, Settings, Integrations
 - Engineering and diagnostics surfaces: Developer Mode, Webhook inspection, Event replay
@@ -79,6 +83,7 @@ The user experience should allow a merchant operations team to:
 ## 4. Navigation architecture
 
 ### Global navigation
+
 - Brand / product name
 - Search / global lookup
 - Notifications
@@ -92,6 +97,7 @@ The user experience should allow a merchant operations team to:
 - User profile / logout
 
 ### Left navigation (desktop)
+
 - Command Center
 - Revenue Risk
 - Recovery Center
@@ -109,6 +115,7 @@ The user experience should allow a merchant operations team to:
 - Settings
 
 ### Mobile navigation
+
 - Bottom navigation with 4-5 core destinations
   - Home
   - Risk
@@ -118,6 +125,7 @@ The user experience should allow a merchant operations team to:
 - Secondary drawer for governance and admin functions
 
 ### Navigation behavior rules
+
 - Users must never be more than 2 clicks away from a high-priority risk or open approval
 - All major screens must show mode status and security context
 - High-risk flows display immediate approval or block indicators
@@ -128,6 +136,7 @@ The user experience should allow a merchant operations team to:
 ## 5. Desktop information architecture
 
 ### Desktop shell
+
 - Header bar with notifications, mode status, search, actions, profile
 - Left rail for workspaces and operational modules
 - Main content area with contextual panels
@@ -138,7 +147,9 @@ The user experience should allow a merchant operations team to:
   - approval summary
 
 ### Desktop layout patterns
+
 #### 1. Command Center dashboard
+
 - Top summary cards
   - Revenue at risk
   - Revenue rescued
@@ -151,16 +162,19 @@ The user experience should allow a merchant operations team to:
 - Approval queue
 
 #### 2. Recovery Center page
+
 - Left: queue and filters
 - Center: selected case detail
 - Right: simulation, policy, and approval panel
 
 #### 3. Human Review page
+
 - Task list on left
 - Details on center
 - Decision controls on right
 
 #### 4. AI Copilot surface
+
 - Prompt composer at top
 - Recommendation summary panel
 - Evidence panel
@@ -168,6 +182,7 @@ The user experience should allow a merchant operations team to:
 - Actionable next steps
 
 ### Desktop UX requirements
+
 - High-density operational views for experts
 - Strong prioritization and filtering
 - Clear multi-column decision surfaces
@@ -178,12 +193,14 @@ The user experience should allow a merchant operations team to:
 ## 6. Mobile information architecture
 
 ### Mobile pattern
+
 - Simplified dashboard with top triage cards
 - Single-column flows for issue assessment and review
 - Anchor actions to bottom or floating CTAs for approval and recovery actions
 - Keep the core loop visible: risk → policy → action → verification
 
 ### Mobile modules
+
 - Home: prioritized issue summary
 - Risk: list of current payment-risk events
 - Recovery: open opportunity list and action summary
@@ -191,6 +208,7 @@ The user experience should allow a merchant operations team to:
 - More: settings, approvals, audit, integrations
 
 ### Mobile UX requirements
+
 - Immediate identification of critical problems
 - One-hand operation for approval and review actions
 - Clean hierarchy and minimal steps for decision making
@@ -201,20 +219,24 @@ The user experience should allow a merchant operations team to:
 ## 7. Onboarding flow
 
 ### Purpose
+
 Guide merchant and team users into the platform with clear context and setup requirements.
 
 ### User
+
 - Merchant admin
 - Finance lead
 - Operations manager
 - Developer / integrator
 
 ### Entry point
+
 - First-time sign-in
 - Invitation link
 - Workspace creation flow
 
 ### Main actions
+
 - Create merchant workspace
 - Choose operating mode: Demo / Test / Production
 - Connect payment environment
@@ -225,6 +247,7 @@ Guide merchant and team users into the platform with clear context and setup req
 - Complete onboarding checklist
 
 ### Data required
+
 - Merchant name and business profile
 - Payment environment selection
 - Team members and roles
@@ -232,25 +255,30 @@ Guide merchant and team users into the platform with clear context and setup req
 - Integration preferences
 
 ### Success state
+
 - Workspace is ready
 - Merchant dashboard loads with clear baseline data and safety settings
 
 ### Error state
+
 - Invalid environment selection
 - Missing required integration config
 - Missing approval configuration
 - Permission mismatch
 
 ### Empty state
+
 - No merchants configured yet
 - No users or workflows connected
 - No risk policies created
 
 ### Loading state
+
 - Setup wizard steps with progress indicator
 - Validation of environment and credentials
 
 ### Permission requirements
+
 - Merchant admin access required for onboarding
 - Integration settings require admin or developer role
 
@@ -259,20 +287,24 @@ Guide merchant and team users into the platform with clear context and setup req
 ## 8. Failed-payment recovery flow
 
 ### Purpose
+
 Handle a failed payment or revenue-threatening transaction through diagnosis, safe strategy selection, and controlled execution.
 
 ### User
+
 - Revenue analyst
 - Merchant operator
 - Risk manager
 
 ### Entry point
+
 - Revenue Risk list
 - Command Center alert
 - Recovery Opportunities queue
 - Incident card
 
 ### Main actions
+
 - View failed transaction summary
 - Inspect payment event details
 - Review the failure reason and risk diagnosis
@@ -283,6 +315,7 @@ Handle a failed payment or revenue-threatening transaction through diagnosis, sa
 - Verify result in ledger
 
 ### Data required
+
 - Transaction ID
 - payment status and error code
 - customer profile
@@ -293,24 +326,29 @@ Handle a failed payment or revenue-threatening transaction through diagnosis, sa
 - ledger and webhook context
 
 ### Success state
+
 - Recovery strategy is accepted and executed
 - Payment status is updated or a recovery action is recorded
 - Financial value outcome is visible in ledger
 
 ### Error state
+
 - Payment event is malformed
 - Recovery is blocked by policy
 - Approval missing for high-risk case
 - Execution fails or is duplicate
 
 ### Empty state
+
 - No failed payment opportunities for selected merchant or timeframe
 
 ### Loading state
+
 - Payment lookup and diagnosis in progress
 - Strategy generation and simulation state
 
 ### Permission requirements
+
 - Analyst can review and simulate
 - Approver needed for high-risk actions
 - Developer role required for test webhook or integration inspection
@@ -320,20 +358,24 @@ Handle a failed payment or revenue-threatening transaction through diagnosis, sa
 ## 9. Revenue incident flow
 
 ### Purpose
+
 Provide a coordinated response to a major revenue-impacting incident.
 
 ### User
+
 - Merchant operator
 - Incident commander
 - Finance manager
 - Risk manager
 
 ### Entry point
+
 - Incident alert banner
 - Command Center incident panel
 - Linked revenue alert
 
 ### Main actions
+
 - Open incident timeline
 - Assess blast radius
 - View impacted customers / transactions
@@ -343,6 +385,7 @@ Provide a coordinated response to a major revenue-impacting incident.
 - Approve and execute safe recovery plan
 
 ### Data required
+
 - Incident type and severity
 - impacted merchants / customers
 - revenue at risk
@@ -351,23 +394,28 @@ Provide a coordinated response to a major revenue-impacting incident.
 - evidence trail
 
 ### Success state
+
 - Incident is triaged
 - Recovery actions are underway or approved
 - Operational owners are assigned
 
 ### Error state
+
 - Incident is unresolved due to missing data
 - Insufficient permissions to act
 - Signature mismatch or invalid event source
 
 ### Empty state
+
 - No active incidents
 
 ### Loading state
+
 - Event aggregation and deduplication in progress
 - Incident correlation analysis loading
 
 ### Permission requirements
+
 - Read access for operations teams
 - Write and escalation access for incident owners
 - Approval access for risk manager or finance lead
@@ -377,19 +425,23 @@ Provide a coordinated response to a major revenue-impacting incident.
 ## 10. Human-review flow
 
 ### Purpose
+
 Ensure high-risk or policy-sensitive decisions receive explicit human oversight.
 
 ### User
+
 - Risk manager
 - Finance lead
 - Operations approver
 
 ### Entry point
+
 - Approval queue
 - Risk gate escalation
 - Recovery detail page
 
 ### Main actions
+
 - Review reason, impact, and policy result
 - Confirm or reject action
 - Add approver note
@@ -397,6 +449,7 @@ Ensure high-risk or policy-sensitive decisions receive explicit human oversight.
 - Escalate to senior approver
 
 ### Data required
+
 - Recovery action summary
 - Policy outcome
 - Risk score and confidence
@@ -405,22 +458,27 @@ Ensure high-risk or policy-sensitive decisions receive explicit human oversight.
 - User identity and approval history
 
 ### Success state
+
 - Approved action is marked as authorized
 - Execution proceeds only after approval metadata is stored
 
 ### Error state
+
 - Approver lacks permissions
 - Approval request expired or invalid
 - Action no longer matches current state
 
 ### Empty state
+
 - No pending approval tasks
 
 ### Loading state
+
 - Approval request state is refreshing
 - Decision payload is validating
 
 ### Permission requirements
+
 - Approver role required
 - Manager or finance role for exception approvals
 
@@ -429,20 +487,24 @@ Ensure high-risk or policy-sensitive decisions receive explicit human oversight.
 ## 11. AI Copilot flow
 
 ### Purpose
+
 Provide a merchant-facing AI assistant that summarizes risk, explains recovery reasons, and recommends next steps without directly executing money movement.
 
 ### User
+
 - Merchant operator
 - Revenue analyst
 - Risk manager
 
 ### Entry point
+
 - Command Center
 - Recovery detail
-a
+  a
 - AI Copilot dock
 
 ### Main actions
+
 - Ask a question about a failed payment or revenue risk
 - Request diagnosis summary
 - Ask for recovery strategy options
@@ -450,6 +512,7 @@ a
 - Accept or reject AI suggestion
 
 ### Data required
+
 - Transaction or customer context
 - Risk evidence
 - Recovery opportunity metadata
@@ -457,21 +520,26 @@ a
 - Product mode
 
 ### Success state
+
 - Clear AI recommendation with explanation and confidence
 - Recommendation is accepted into a workflow or converted to a policy-aware action plan
 
 ### Error state
+
 - AI output fails validation
 - Missing required context
 - Model provider unavailable
 
 ### Empty state
+
 - No active session or no context selected
 
 ### Loading state
+
 - Context gathering and model response in progress
 
 ### Permission requirements
+
 - General user access to AI Copilot for relevant data
 - Enhanced access for analysts and managers
 - No direct access to secrets or financial execution actions
@@ -481,19 +549,23 @@ a
 ## 12. Recovery simulation flow
 
 ### Purpose
+
 Estimate the likely impact and safety of one or more recovery strategies before approval and execution.
 
 ### User
+
 - Revenue analyst
 - Risk manager
 - Merchant operator
 
 ### Entry point
+
 - Recovery opportunity detail
 - Strategy proposal panel
 - AI Copilot recovery suggestion
 
 ### Main actions
+
 - Select strategy options
 - Configure parameters and assumptions
 - Run simulation
@@ -502,6 +574,7 @@ Estimate the likely impact and safety of one or more recovery strategies before 
 - Save recommended strategy
 
 ### Data required
+
 - Customer and transaction context
 - Candidate action options
 - Historical performance data
@@ -509,20 +582,25 @@ Estimate the likely impact and safety of one or more recovery strategies before 
 - Estimated value range
 
 ### Success state
+
 - A clear recommendation is generated with expected value and risk tradeoff
 
 ### Error state
+
 - Simulation fails because required data is missing
 - Strategy is blocked by policy
 - Output cannot be validated
 
 ### Empty state
+
 - No recovery strategies available yet
 
 ### Loading state
+
 - Strategy evaluation and scoring in progress
 
 ### Permission requirements
+
 - Analyst or operator access to simulate
 - Manager to approve final strategy if risk thresholds are exceeded
 
@@ -531,24 +609,29 @@ Estimate the likely impact and safety of one or more recovery strategies before 
 ## 13. Autopilot flow
 
 ### Purpose
+
 Allow a trusted, fully deterministic automation path for safe, low-risk recovery actions that satisfy policy and approval requirements.
 
 ### User
+
 - Merchant operator
 - Revenue operations lead
 
 ### Entry point
+
 - Recovery Center
 - Policy-approved opportunity card
 - Autopilot configuration page
 
 ### Main actions
+
 - Enable or disable autopilot for a merchant, segment, or scenario
 - Review system-managed actions
 - Approve autopilot-assigned actions for low-risk cases
 - Stop or pause autopilot
 
 ### Data required
+
 - Merchant configuration
 - Policy thresholds
 - Risk score ranges
@@ -556,19 +639,24 @@ Allow a trusted, fully deterministic automation path for safe, low-risk recovery
 - Self-service action permissions
 
 ### Success state
+
 - Low-risk actions are automatically processed according to policy
 
 ### Error state
+
 - Threshold exceeds rule and autopilot blocks execution
 - Non-deterministic state or invalid policy version
 
 ### Empty state
+
 - No configured autopilot rules
 
 ### Loading state
+
 - Policy evaluation and automation engine checks
 
 ### Permission requirements
+
 - Merchant admin or operations admin role
 - Risk and policy review for changes to automation settings
 
@@ -577,25 +665,30 @@ Allow a trusted, fully deterministic automation path for safe, low-risk recovery
 ## 14. Kill-switch flow
 
 ### Purpose
+
 Safely halt automated or semi-automated recovery actions when risk, policy, or operational conditions require emergency control.
 
 ### User
+
 - Security admin
 - Merchant admin
 - Risk manager
 
 ### Entry point
+
 - Security page
 - Risk settings page
 - Incident command panel
 
 ### Main actions
+
 - Pause all recovery execution
 - Pause specific merchant operations
 - Pause a policy class or risk threshold
 - Resume only after validation
 
 ### Data required
+
 - Merchant identity
 - Current execution status
 - policy impact
@@ -603,20 +696,25 @@ Safely halt automated or semi-automated recovery actions when risk, policy, or o
 - user authorization
 
 ### Success state
+
 - Recovery operations are stopped safely with a visible status state
 
 ### Error state
+
 - Kill switch action cannot be authorized
 - User lacks required permission
 - Existing execution cannot be interrupted cleanly
 
 ### Empty state
+
 - No kill-switch actions currently active
 
 ### Loading state
+
 - System is applying suspension to services and policies
 
 ### Permission requirements
+
 - Security or merchant admin role required
 - Escalation to higher-level security for emergency shutdown
 
@@ -625,19 +723,23 @@ Safely halt automated or semi-automated recovery actions when risk, policy, or o
 ## 15. Developer event inspection flow
 
 ### Purpose
+
 Allow developers and integrations engineers to validate events, signatures, deduplication, and operational behavior in a safe environment.
 
 ### User
+
 - Developer
 - Integrations engineer
 - QA engineer
 
 ### Entry point
+
 - Developer Mode
 - Webhook inspection tab
 - Test environment diagnostics
 
 ### Main actions
+
 - Inspect event payload
 - Verify signature status
 - Review deduplication result
@@ -646,6 +748,7 @@ Allow developers and integrations engineers to validate events, signatures, dedu
 - Validate demo/test mode behavior
 
 ### Data required
+
 - Event payload
 - Event ID and timestamp
 - webhook signature
@@ -654,20 +757,25 @@ Allow developers and integrations engineers to validate events, signatures, dedu
 - deduplication result
 
 ### Success state
+
 - Event status is confirmed as valid, duplicated, rejected, or replayed safely
 
 ### Error state
+
 - Signature mismatch
 - Missing required fields
 - Invalid mode context
 
 ### Empty state
+
 - No event records loaded yet
 
 ### Loading state
+
 - Event validation and signature processing in progress
 
 ### Permission requirements
+
 - Developer or admin access required
 - Restricted to environment-specific access
 
@@ -676,6 +784,7 @@ Allow developers and integrations engineers to validate events, signatures, dedu
 ## 16. Core recovery flow specification
 
 ### Core flow
+
 Payment Failed
 → Detection
 → Diagnosis
@@ -690,51 +799,64 @@ Payment Failed
 → Revenue Ledger
 
 ### UX responsibilities at each stage
+
 #### 1. Payment Failed
+
 - Show a clear alert with payment status and value-at-risk
 - Provide immediate context for merchant and finance users
 
 #### 2. Detection
+
 - Highlight the transaction in the risk feed or dashboard
 - Show reason and severity classification
 
 #### 3. Diagnosis
+
 - Explain why the payment failed or why revenue is at risk
 - Show supporting evidence and customer signal context
 
 #### 4. Strategy
+
 - List recommended recovery options with estimated impact
 - Allow simulation before final selection
 
 #### 5. Policy
+
 - Display whether the strategy is allowed, blocked, or escalated
 - Show the rule results behind the decision
 
 #### 6. Risk
+
 - Display the business and operational risk score
 - Explain if the action requires approval or is blocked
 
 #### 7. Approval
+
 - Provide a review page for high-risk or out-of-policy cases
 - Capture approver identity and rationale
 
 #### 8. Execution
+
 - Run only approved, deterministic backend actions in Demo/Test mode
 - Show status, time, and outcome
 
 #### 9. Razorpay
+
 - Display secure external payment-system status
 - Keep secrets hidden and outside the client UI
 
 #### 10. Webhook
+
 - Validate event payload and deduplication state
 - Surface result clearly for developers and ops teams
 
 #### 11. Verification
+
 - Show whether the recovery action resulted in revenue restored or the event failed
 - Include final transaction status and any retries
 
 #### 12. Revenue Ledger
+
 - Show the financial delta and audit linkage
 - Keep records immutable and traceable
 
@@ -745,33 +867,43 @@ Payment Failed
 Each UI screen should follow the same structure:
 
 ### Purpose
+
 What the page is intended to accomplish.
 
 ### User
+
 Who uses this page and why.
 
 ### Entry point
+
 How the page is reached from the product navigation or other screens.
 
 ### Main actions
+
 The core tasks the user can perform.
 
 ### Data required
+
 The minimum data required to render and operate the screen.
 
 ### Success state
+
 The state after the core workflow has worked as intended.
 
 ### Error state
+
 What happens when the workflow fails or data is invalid.
 
 ### Empty state
+
 How the screen looks with no data.
 
 ### Loading state
+
 How the screen behaves while data or decisions are being prepared.
 
 ### Permission requirements
+
 Which roles can access the screen and which actions are allowed.
 
 ---
@@ -792,6 +924,7 @@ Which roles can access the screen and which actions are allowed.
 ## 19. Implementation guidance for the next UI phase
 
 The next UI implementation phase should start with these screens in priority order:
+
 1. Command Center
 2. Revenue Risk
 3. Recovery Opportunity detail

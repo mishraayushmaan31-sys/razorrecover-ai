@@ -14,6 +14,7 @@ This document outlines the Business Continuity and Disaster Recovery (BC/DR) str
 ## 2. Disaster Scenarios & Mitigation Procedures
 
 ### Scenario A: Single Availability Zone Outage
+
 - **Impact**: One AWS data center in `ap-south-1` becomes unreachable.
 - **Automated Response**:
   - **RDS Multi-AZ**: Synchronous primary-to-standby failover triggers automatically within 60–120 seconds. DNS endpoint updates transparently.
@@ -21,6 +22,7 @@ This document outlines the Business Continuity and Disaster Recovery (BC/DR) str
   - **Intervention Needed**: None. Zero data loss (RPO = 0, RTO < 2 minutes).
 
 ### Scenario B: Database Corruption or Malicious Data Deletion
+
 - **Impact**: Accidental drop table, corrupt migration, or unauthorized modification.
 - **Recovery Procedure**:
   1. Determine the exact timestamp immediately preceding corruption (e.g., `T - 12 minutes`).
@@ -38,6 +40,7 @@ This document outlines the Business Continuity and Disaster Recovery (BC/DR) str
   - **RTO**: ~20 minutes.
 
 ### Scenario C: Complete Regional Outage (`ap-south-1`)
+
 - **Impact**: Catastrophic regional network disconnection.
 - **Recovery Procedure**:
   1. Terraform IaC scripts (`infrastructure/terraform/`) can be initialized in backup region `ap-southeast-1` (Singapore).
@@ -56,4 +59,3 @@ This document outlines the Business Continuity and Disaster Recovery (BC/DR) str
    - Force RDS failover via `aws rds reboot-db-instance --force-failover`.
    - Validate continuous webhook acceptance via SQS queue buffer during DB reboot.
    - Verify zero unhandled payment drops or duplicate ledger credits.
-

@@ -17,4 +17,3 @@ export async function POST(request: NextRequest) {
     return safeError(error, guard.id);
   }
 }
-

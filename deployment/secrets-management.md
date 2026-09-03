@@ -6,14 +6,14 @@ This document defines the secrets architecture, encryption mechanisms, access po
 
 ## 1. Secrets Inventory
 
-| Secret Key | Purpose | Storage Service | Rotation Cadence |
-| :--- | :--- | :--- | :--- |
-| `DATABASE_URL` | PostgreSQL connection string with TLS | AWS Secrets Manager (`razorrecover/prod/app-secrets`) | 90 days |
-| `JWT_SECRET` | Token signing secret for user authentication | AWS Secrets Manager (`razorrecover/prod/app-secrets`) | 60 days |
-| `SESSION_SECRET` | 32-character AES-GCM session encryption secret | AWS Secrets Manager (`razorrecover/prod/app-secrets`) | 90 days |
-| `RAZORPAY_KEY_ID` | Merchant gateway public API key | AWS Secrets Manager (`razorrecover/prod/app-secrets`) | Annual / As needed |
-| `RAZORPAY_KEY_SECRET` | Merchant gateway private API secret | AWS Secrets Manager (`razorrecover/prod/app-secrets`) | Annual / Immediate on breach |
-| `RAZORPAY_WEBHOOK_SECRET` | HMAC-SHA256 signature verification key | AWS Secrets Manager (`razorrecover/prod/app-secrets`) | Annual / Immediate on breach |
+| Secret Key                | Purpose                                        | Storage Service                                       | Rotation Cadence             |
+| :------------------------ | :--------------------------------------------- | :---------------------------------------------------- | :--------------------------- |
+| `DATABASE_URL`            | PostgreSQL connection string with TLS          | AWS Secrets Manager (`razorrecover/prod/app-secrets`) | 90 days                      |
+| `JWT_SECRET`              | Token signing secret for user authentication   | AWS Secrets Manager (`razorrecover/prod/app-secrets`) | 60 days                      |
+| `SESSION_SECRET`          | 32-character AES-GCM session encryption secret | AWS Secrets Manager (`razorrecover/prod/app-secrets`) | 90 days                      |
+| `RAZORPAY_KEY_ID`         | Merchant gateway public API key                | AWS Secrets Manager (`razorrecover/prod/app-secrets`) | Annual / As needed           |
+| `RAZORPAY_KEY_SECRET`     | Merchant gateway private API secret            | AWS Secrets Manager (`razorrecover/prod/app-secrets`) | Annual / Immediate on breach |
+| `RAZORPAY_WEBHOOK_SECRET` | HMAC-SHA256 signature verification key         | AWS Secrets Manager (`razorrecover/prod/app-secrets`) | Annual / Immediate on breach |
 
 ---
 
@@ -34,4 +34,3 @@ This document defines the secrets architecture, encryption mechanisms, access po
      3. After 24 hours, the secondary key is decommissioned.
 2. **Database Password Rotation**:
    - Managed automatically via AWS Secrets Manager RDS rotation lambda function.
-

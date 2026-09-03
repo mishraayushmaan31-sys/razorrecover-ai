@@ -112,7 +112,8 @@ export function getCanonicalWarRoomData(isResolved = false, resolvedAt?: string)
       timeOffset: 'T-25m',
       timestamp: '12:42:15 UTC',
       title: 'Baseline Degradation Detected',
-      description: 'Payment gateway telemetry registered initial 4.8% success drop on HDFC Netbanking endpoint.',
+      description:
+        'Payment gateway telemetry registered initial 4.8% success drop on HDFC Netbanking endpoint.',
       category: 'DETECTION',
       severity: 'WARNING',
     },
@@ -121,7 +122,8 @@ export function getCanonicalWarRoomData(isResolved = false, resolvedAt?: string)
       timeOffset: 'T-20m',
       timestamp: '12:47:03 UTC',
       title: 'Failure-Rate Spike Trigger (#1042 Standing Up)',
-      description: 'Failure rate spiked from normal baseline 3.6% to 21.9%. Revenue at risk breached ₹5,00,000 threshold. AI Revenue War Room automatically initiated.',
+      description:
+        'Failure rate spiked from normal baseline 3.6% to 21.9%. Revenue at risk breached ₹5,00,000 threshold. AI Revenue War Room automatically initiated.',
       category: 'DETECTION',
       severity: 'CRITICAL',
     },
@@ -130,7 +132,8 @@ export function getCanonicalWarRoomData(isResolved = false, resolvedAt?: string)
       timeOffset: 'T-15m',
       timestamp: '12:52:19 UTC',
       title: 'AI Diagnostic Agent Pinpoints Root Cause',
-      description: 'Identified HDFC Netbanking 504 Gateway Timeouts and Webhook acknowledgement latency surging beyond 8.2s causing cascade drops.',
+      description:
+        'Identified HDFC Netbanking 504 Gateway Timeouts and Webhook acknowledgement latency surging beyond 8.2s causing cascade drops.',
       category: 'DIAGNOSIS',
       severity: 'CRITICAL',
     },
@@ -139,7 +142,8 @@ export function getCanonicalWarRoomData(isResolved = false, resolvedAt?: string)
       timeOffset: 'T-12m',
       timestamp: '12:55:40 UTC',
       title: 'Policy Gate POL-RETRY-02 Evaluated',
-      description: 'Deterministic policy verified mitigation plan. Permitted secondary rail rerouting; blocked zero-delay retry storms.',
+      description:
+        'Deterministic policy verified mitigation plan. Permitted secondary rail rerouting; blocked zero-delay retry storms.',
       category: 'POLICY_GATE',
       severity: 'INFO',
     },
@@ -148,7 +152,8 @@ export function getCanonicalWarRoomData(isResolved = false, resolvedAt?: string)
       timeOffset: 'T-10m',
       timestamp: '12:57:12 UTC',
       title: 'Automated Mitigations Dispatched',
-      description: 'Smart routing switched 82% of netbanking traffic to backup Razorpay rail. Dynamic retry queue initialized with 15-minute jitter.',
+      description:
+        'Smart routing switched 82% of netbanking traffic to backup Razorpay rail. Dynamic retry queue initialized with 15-minute jitter.',
       category: 'MITIGATION',
       severity: 'INFO',
     },
@@ -157,14 +162,19 @@ export function getCanonicalWarRoomData(isResolved = false, resolvedAt?: string)
       timeOffset: 'T-06m',
       timestamp: '13:01:45 UTC',
       title: 'Human Review Escalations Assigned',
-      description: 'Ticket #HR-1042 routed to On-Call Treasury & Gateway Ops for manual rail rate-limit bump approval.',
+      description:
+        'Ticket #HR-1042 routed to On-Call Treasury & Gateway Ops for manual rail rate-limit bump approval.',
       category: 'ESCALATION',
       severity: 'WARNING',
     },
     {
       id: 'evt-7',
       timeOffset: isResolved ? 'T-00m' : 'T-02m',
-      timestamp: isResolved ? (resolvedAt ? new Date(resolvedAt).toTimeString().split(' ')[0] + ' UTC' : '13:08:12 UTC') : '13:06:00 UTC',
+      timestamp: isResolved
+        ? resolvedAt
+          ? new Date(resolvedAt).toTimeString().split(' ')[0] + ' UTC'
+          : '13:08:12 UTC'
+        : '13:06:00 UTC',
       title: isResolved ? 'Incident Resolved – Recovery Verified' : 'Stabilization In Progress',
       description: isResolved
         ? 'All degraded transactions re-routed or retried. Payment success rate restored to 95.8%. ₹5,84,200 rescued.'
@@ -221,7 +231,8 @@ export function getCanonicalWarRoomData(isResolved = false, resolvedAt?: string)
     {
       id: 'act-rec-1',
       title: 'Dynamic Gateway Rail Failover',
-      description: 'Rerouted 82% of netbanking and UPI traffic away from degraded HDFC node to secondary Razorpay fallback rail.',
+      description:
+        'Rerouted 82% of netbanking and UPI traffic away from degraded HDFC node to secondary Razorpay fallback rail.',
       category: 'RECOVERY',
       status: 'EXECUTED',
       executedBy: 'AI Mitigation Controller',
@@ -231,7 +242,8 @@ export function getCanonicalWarRoomData(isResolved = false, resolvedAt?: string)
     {
       id: 'act-rec-2',
       title: 'Smart Retry Engine with 15m Exponential Jitter',
-      description: 'Scheduled batch retries for 412 transient 504 drops with backoff window to prevent gateway hammering.',
+      description:
+        'Scheduled batch retries for 412 transient 504 drops with backoff window to prevent gateway hammering.',
       category: 'RECOVERY',
       status: isResolved ? 'COMPLETED' : 'EXECUTED',
       executedBy: 'Deterministic Recovery Engine',
@@ -241,7 +253,8 @@ export function getCanonicalWarRoomData(isResolved = false, resolvedAt?: string)
     {
       id: 'act-rec-3',
       title: 'VIP Fallback Payment Links Dispatched',
-      description: 'Generated secure payment retry links sent via SMS/WhatsApp to 84 high-value subscription customers.',
+      description:
+        'Generated secure payment retry links sent via SMS/WhatsApp to 84 high-value subscription customers.',
       category: 'RECOVERY',
       status: 'EXECUTED',
       executedBy: 'Customer Recovery Agent',
@@ -251,7 +264,8 @@ export function getCanonicalWarRoomData(isResolved = false, resolvedAt?: string)
     {
       id: 'act-rec-4',
       title: 'Automated Cart Session Extension',
-      description: 'Extended checkout session expiry from 15m to 60m for impacted enterprise checkouts.',
+      description:
+        'Extended checkout session expiry from 15m to 60m for impacted enterprise checkouts.',
       category: 'RECOVERY',
       status: 'EXECUTED',
       executedBy: 'Session Guard',
@@ -263,7 +277,8 @@ export function getCanonicalWarRoomData(isResolved = false, resolvedAt?: string)
     {
       id: 'act-blk-1',
       title: 'Zero-Delay Aggressive Payment Retries',
-      description: 'Halted immediate continuous retries that would trigger gateway IP rate-limiting and customer card locks.',
+      description:
+        'Halted immediate continuous retries that would trigger gateway IP rate-limiting and customer card locks.',
       category: 'BLOCKED',
       status: 'BLOCKED',
       reason: 'Violates Policy POL-RETRY-02 (Anti-Flapping Backoff Requirement)',
@@ -272,7 +287,8 @@ export function getCanonicalWarRoomData(isResolved = false, resolvedAt?: string)
     {
       id: 'act-blk-2',
       title: 'Direct Card Re-Debit Without 2FA Step-Up',
-      description: 'Intercepted proposed automatic recurring charge re-attempt without mandatory RBI 2FA verification.',
+      description:
+        'Intercepted proposed automatic recurring charge re-attempt without mandatory RBI 2FA verification.',
       category: 'BLOCKED',
       status: 'BLOCKED',
       reason: 'Violates Policy POL-RISK-09 (RBI Two-Factor Authentication Compliance)',
@@ -281,7 +297,8 @@ export function getCanonicalWarRoomData(isResolved = false, resolvedAt?: string)
     {
       id: 'act-blk-3',
       title: 'Unverified Batch Re-Attempt Without Bank Sync',
-      description: 'Blocked bulk execution until bank acknowledgement state could be verified via idempotency keys.',
+      description:
+        'Blocked bulk execution until bank acknowledgement state could be verified via idempotency keys.',
       category: 'BLOCKED',
       status: 'BLOCKED',
       reason: 'Violates Safety Barrier: Idempotency Verification Required',
@@ -290,7 +307,8 @@ export function getCanonicalWarRoomData(isResolved = false, resolvedAt?: string)
     {
       id: 'act-blk-4',
       title: 'High-Value Account Auto-Downgrade',
-      description: 'Blocked automated subscription cancellation for users whose recurring payment failed during the incident.',
+      description:
+        'Blocked automated subscription cancellation for users whose recurring payment failed during the incident.',
       category: 'BLOCKED',
       status: 'BLOCKED',
       reason: 'Violates Policy POL-SUB-04 (Grace Period Protection for Outages)',
@@ -302,7 +320,8 @@ export function getCanonicalWarRoomData(isResolved = false, resolvedAt?: string)
     {
       id: 'act-esc-1',
       title: 'Ticket #HR-1042: Secondary Gateway Rail Limit Bump',
-      description: 'Escalated to On-Call Treasury & Gateway Ops to approve rate-limit elevation from 500 TPS to 2,000 TPS.',
+      description:
+        'Escalated to On-Call Treasury & Gateway Ops to approve rate-limit elevation from 500 TPS to 2,000 TPS.',
       category: 'ESCALATION',
       status: isResolved ? 'COMPLETED' : 'ACKNOWLEDGED',
       executedBy: 'Assigned to Ops Lead (K. Sharma)',
@@ -311,7 +330,8 @@ export function getCanonicalWarRoomData(isResolved = false, resolvedAt?: string)
     {
       id: 'act-esc-2',
       title: 'Ticket #HR-1043: Tier-1 Enterprise SLA Notification',
-      description: 'Escalated to Merchant Success Lead for proactive notification of 12 enterprise accounts regarding gateway latency.',
+      description:
+        'Escalated to Merchant Success Lead for proactive notification of 12 enterprise accounts regarding gateway latency.',
       category: 'ESCALATION',
       status: isResolved ? 'COMPLETED' : 'ACKNOWLEDGED',
       executedBy: 'Assigned to Enterprise Support (R. Mehta)',
@@ -323,7 +343,8 @@ export function getCanonicalWarRoomData(isResolved = false, resolvedAt?: string)
     {
       id: 'act-uns-1',
       title: 'Unsafe Mass-Recharge Without Bank ACK',
-      description: 'Proposed blind re-debiting of 230 simultaneous customer accounts without gateway acknowledgement receipt.',
+      description:
+        'Proposed blind re-debiting of 230 simultaneous customer accounts without gateway acknowledgement receipt.',
       category: 'UNSAFE',
       status: 'BLOCKED',
       reason: 'Classified as UNSAFE: Extreme risk of double-charging customer bank accounts.',

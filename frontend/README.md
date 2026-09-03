@@ -5,6 +5,7 @@ This folder is reserved for the UI implementation phase.
 The project is intentionally keeping the design system and reusable component foundation separate from business flow implementation, per the architecture and product phases defined earlier.
 
 Planned UI implementation:
+
 - app shell and navigation
 - design tokens and theme primitives
 - reusable enterprise components

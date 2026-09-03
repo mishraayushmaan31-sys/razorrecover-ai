@@ -17,4 +17,3 @@ export async function GET(request: NextRequest) {
     return safeError(error, guard.id);
   }
 }
-

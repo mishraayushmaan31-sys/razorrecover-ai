@@ -7,6 +7,7 @@ The backend is intentionally structured to enforce the architecture principle:
 AI Recommendation -> Deterministic Business Logic -> Policy Engine -> Risk Engine -> Execution Service -> Payment Provider -> Webhook Verification -> Revenue Ledger
 
 Planned backend scope for the next implementation phase:
+
 - API layer and route structure
 - service layer for risk, policy, approval, execution, and ledger
 - Prisma data layer and schema setup

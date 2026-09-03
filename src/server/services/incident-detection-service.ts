@@ -1,10 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 
 export type AbnormalSignalType =
-  | 'PAYMENT_DEGRADATION'
-  | 'FAILURE_RATE_SPIKE'
-  | 'REVENUE_IMPACT'
-  | 'CUSTOMER_SEGMENT_IMPACT';
+  'PAYMENT_DEGRADATION' | 'FAILURE_RATE_SPIKE' | 'REVENUE_IMPACT' | 'CUSTOMER_SEGMENT_IMPACT';
 
 export type AbnormalSignal = {
   type: AbnormalSignalType;
@@ -71,11 +68,10 @@ export function detectRevenueIncident(input?: DetectionInput): RevenueIncidentDe
   // Baseline benchmarks
   const normalSuccess = input?.normalSuccessRate ?? 96.4;
   const currentSuccess = input?.currentSuccessRate ?? 78.1;
-  const normalFailure = input?.normalFailureRate ?? (100 - normalSuccess); // 3.6%
-  const currentFailure = input?.currentFailureRate ?? (100 - currentSuccess); // 21.9%
+  const normalFailure = input?.normalFailureRate ?? 100 - normalSuccess; // 3.6%
+  const currentFailure = input?.currentFailureRate ?? 100 - currentSuccess; // 21.9%
   const impactAmount = input?.revenueImpact ?? 642800;
-  const segment =
-    input?.affectedSegment ?? 'HDFC & ICICI Netbanking / High-Value Subscriptions';
+  const segment = input?.affectedSegment ?? 'HDFC & ICICI Netbanking / High-Value Subscriptions';
 
   // 1. Detect Payment Degradation (drop > 5 percentage points)
   const degradationDrop = normalSuccess - currentSuccess;

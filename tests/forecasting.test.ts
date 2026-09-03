@@ -1,7 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  generateRevenueForecast,
-} from '../src/server/services/forecasting-service';
+import { generateRevenueForecast } from '../src/server/services/forecasting-service';
 
 describe('Prompt 19: Revenue Forecasting', () => {
   it('implements revenue forecasting for 1 hour, 4 hours, 12 hours, and 24 hours', () => {
@@ -79,4 +77,3 @@ describe('Prompt 19: Revenue Forecasting', () => {
     expect(forecast.summary24h.estimatedRecoveryRate).toBe('90.9%');
   });
 });
-

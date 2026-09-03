@@ -827,9 +827,18 @@ h1 {
   animation: pulse-badge 1.8s infinite;
 }
 @keyframes pulse-badge {
-  0% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.82; transform: scale(0.96); }
-  100% { opacity: 1; transform: scale(1); }
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.82;
+    transform: scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 /* Incident Alert Card on Command Center */

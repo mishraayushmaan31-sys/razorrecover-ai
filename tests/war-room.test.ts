@@ -1,7 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  getCanonicalWarRoomData,
-} from '../src/server/services/war-room-service';
+import { getCanonicalWarRoomData } from '../src/server/services/war-room-service';
 
 describe('Prompt 19: AI REVENUE WAR ROOM', () => {
   it('instantiates example incident REVENUE INCIDENT #1042 with required metrics', () => {
@@ -88,9 +86,7 @@ describe('Prompt 19: AI REVENUE WAR ROOM', () => {
 
     // Human escalations
     expect(warRoom.humanEscalations.length).toBeGreaterThanOrEqual(2);
-    const ticket1042 = warRoom.humanEscalations.find((a) =>
-      a.title.includes('Ticket #HR-1042'),
-    );
+    const ticket1042 = warRoom.humanEscalations.find((a) => a.title.includes('Ticket #HR-1042'));
     expect(ticket1042).toBeDefined();
   });
 
@@ -132,4 +128,3 @@ describe('Prompt 19: AI REVENUE WAR ROOM', () => {
     expect(res.unsafeActionsSummary[0]).toContain('unsafe mass re-charge');
   });
 });
-

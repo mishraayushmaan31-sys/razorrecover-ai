@@ -14,11 +14,12 @@
 ## 🌐 How to Open the Live Application
 
 ### 🟢 Option 1: Open Locally in Your Web Browser (Currently Running!)
+
 The application server is already compiled and actively running on your machine:
 👉 **[Open Live App at http://localhost:3000](http://localhost:3000)**
 
 - **Command Center & Workflow**: [http://localhost:3000](http://localhost:3000)
-- **AI Revenue War Room (#1042)**: [http://localhost:3000](http://localhost:3000) *(switch tab to War Room)*
+- **AI Revenue War Room (#1042)**: [http://localhost:3000](http://localhost:3000) _(switch tab to War Room)_
 - **Incident Detection Telemetry**: [http://localhost:3000/api/incidents/detection](http://localhost:3000/api/incidents/detection)
 - **Revenue Forecast API**: [http://localhost:3000/api/forecast](http://localhost:3000/api/forecast)
 - **Health Check Endpoint**: [http://localhost:3000/api/health](http://localhost:3000/api/health)
@@ -26,6 +27,7 @@ The application server is already compiled and actively running on your machine:
 ---
 
 ### ☁️ Option 2: Deploy Publicly to the Cloud in 1 Click (Vercel)
+
 If you want to view the project from your mobile phone or share it with anyone via a public HTTPS URL without running code on your computer, deploy it to Vercel with 1 click:
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fmishraayushmaan31-sys%2Frazorrecover-ai)
@@ -50,6 +52,7 @@ flowchart LR
 ```
 
 ### Safety Guarantees:
+
 - **No Direct LLM Mutation**: Language models never directly trigger bank debits or money transfers.
 - **Fail-Safe Policy Gate**: Conflicting rules, critical risk scores ($\ge 80$), and unverified webhooks fail closed (`BLOCK` or `REQUIRE_REVIEW`).
 - **Timing-Safe Webhooks**: All incoming webhook payloads are verified using HMAC-SHA256 with timing-safe comparison (`crypto.timingSafeEqual`) to prevent timing attacks.
@@ -60,14 +63,18 @@ flowchart LR
 ## ⚡ Key Modules
 
 ### 1. Revenue Incident Detection
+
 Monitors payment traffic in real time and automatically detects anomalies:
+
 - **Payment Degradation**: Detects drops $\ge 5\%$ (e.g. 96.4% down to 78.1%).
 - **Failure-Rate Spikes**: Detects surges $\ge 2.0\times$ (e.g. 3.6% baseline surging to 21.9%).
 - **Financial Exposure**: Detects high-value merchant revenue at risk.
-- **Segment Blast Radius**: Isolates impacted customer segments (e.g., *HDFC & ICICI Netbanking / High-Value Subscriptions*).
+- **Segment Blast Radius**: Isolates impacted customer segments (e.g., _HDFC & ICICI Netbanking / High-Value Subscriptions_).
 
 ### 2. AI Revenue War Room
+
 Coordinates high-urgency incident response for major disruptions (such as **REVENUE INCIDENT #1042**):
+
 - **Live Telemetry & Diagnostics**: Real-time monitoring of gateway nodes, webhook pipelines, and VIP accounts.
 - **Action Board**:
   - **Recovery Actions**: Dynamic failover routing to secondary rails, smart retries with 15m exponential jitter, and VIP links.
@@ -76,7 +83,9 @@ Coordinates high-urgency incident response for major disruptions (such as **REVE
 - **Incident Resolution**: Interactive lifecycle concluding with verified revenue rescued, recovery rate, and post-mortem audit.
 
 ### 3. Multi-Horizon Revenue Forecasting
+
 Provides algorithmic revenue projections across 4 explicit horizons:
+
 - **1 Hour** | **4 Hours** | **12 Hours** | **24 Hours**
 - Each projection includes gross revenue, revenue at risk, expected rescued revenue, unmitigated vs. mitigated conversion rates, and confidence intervals.
 - Prominently labeled with **`PREDICTION / ESTIMATE`** badges.
@@ -92,6 +101,7 @@ npm run test
 ```
 
 ### 12 Explicit Failure Scenarios Tested & Verified:
+
 1. **Razorpay Timeout**: Safe reads retry with exponential backoff; mutations abort immediately without automatic retry.
 2. **Duplicate Webhook**: Idempotency layer deduplicates incoming events and prevents double processing.
 3. **Invalid Webhook Signature**: Signature verification strictly rejects unverified payloads with HTTP 401.
@@ -110,33 +120,41 @@ npm run test
 ## 🚀 Quickstart Guide
 
 ### Prerequisites
+
 - Node.js 22+
 - npm 10+
 
 ### 1. Clone the Repository
+
 ```bash
 git clone https://github.com/mishraayushmaan31-sys/razorrecover-ai.git
 cd razorrecover-ai
 ```
 
 ### 2. Install Dependencies
+
 ```bash
 npm install
 ```
 
 ### 3. Environment Configuration
+
 Copy the example environment file:
+
 ```bash
 cp .env.example .env
 ```
 
 ### 4. Run the Development Server
+
 ```bash
 npm run dev
 ```
+
 Open **[http://localhost:3000](http://localhost:3000)** in your browser.
 
 ### 5. Run Quality & Test Checks
+
 ```bash
 npm run test        # Run 70 vitest test suites
 npm run typecheck   # Validate TypeScript types
@@ -149,6 +167,7 @@ npm run build       # Compile Next.js production build
 ## ☁️ Cloud Infrastructure (AWS MVP)
 
 The project includes production-ready Terraform Infrastructure as Code in [`infrastructure/terraform/`](infrastructure/terraform/):
+
 - **CloudFront & Route 53**: Edge CDN with static asset caching and health check routing.
 - **AWS WAFv2**: OWASP Common Rules, Amazon IP reputation list, and IP rate limiting (500 req / 5 min).
 - **ECS Fargate**: Serverless container execution with auto-scaling (2 to 6 tasks).

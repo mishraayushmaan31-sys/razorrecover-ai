@@ -162,7 +162,10 @@ export function generateRevenueForecast(): RevenueForecastResult {
   };
 
   const h24 = horizons['24h'];
-  const recoveryRate = ((h24.expectedRevenueRescuedValue / h24.projectedRevenueAtRiskValue) * 100).toFixed(1);
+  const recoveryRate = (
+    (h24.expectedRevenueRescuedValue / h24.projectedRevenueAtRiskValue) *
+    100
+  ).toFixed(1);
 
   return {
     predictionLabel: 'PREDICTION / ESTIMATE',

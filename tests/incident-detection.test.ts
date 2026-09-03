@@ -27,35 +27,25 @@ describe('Prompt 19: Revenue Incident Detection', () => {
     expect(signalTypes).toContain('CUSTOMER_SEGMENT_IMPACT');
 
     // Verify payment degradation details
-    const degradationSignal = result.abnormalSignals.find(
-      (s) => s.type === 'PAYMENT_DEGRADATION',
-    );
+    const degradationSignal = result.abnormalSignals.find((s) => s.type === 'PAYMENT_DEGRADATION');
     expect(degradationSignal?.detected).toBe(true);
     expect(degradationSignal?.severity).toBe('CRITICAL');
     expect(degradationSignal?.metric).toBe('96.4% → 78.1%');
 
     // Verify failure-rate spike details
-    const spikeSignal = result.abnormalSignals.find(
-      (s) => s.type === 'FAILURE_RATE_SPIKE',
-    );
+    const spikeSignal = result.abnormalSignals.find((s) => s.type === 'FAILURE_RATE_SPIKE');
     expect(spikeSignal?.detected).toBe(true);
     expect(spikeSignal?.metric).toBe('3.6% → 21.9%');
 
     // Verify revenue impact details
-    const revenueSignal = result.abnormalSignals.find(
-      (s) => s.type === 'REVENUE_IMPACT',
-    );
+    const revenueSignal = result.abnormalSignals.find((s) => s.type === 'REVENUE_IMPACT');
     expect(revenueSignal?.detected).toBe(true);
     expect(revenueSignal?.severity).toBe('CRITICAL');
 
     // Verify segment impact
-    const segmentSignal = result.abnormalSignals.find(
-      (s) => s.type === 'CUSTOMER_SEGMENT_IMPACT',
-    );
+    const segmentSignal = result.abnormalSignals.find((s) => s.type === 'CUSTOMER_SEGMENT_IMPACT');
     expect(segmentSignal?.detected).toBe(true);
-    expect(segmentSignal?.metric).toBe(
-      'HDFC & ICICI Netbanking / High-Value Subscriptions',
-    );
+    expect(segmentSignal?.metric).toBe('HDFC & ICICI Netbanking / High-Value Subscriptions');
   });
 
   it('displays the required fields: Normal Failure Rate, Current Failure Rate, Revenue Impact, Affected Segment, AI Confidence, Recommended Mitigation', () => {
@@ -74,9 +64,7 @@ describe('Prompt 19: Revenue Incident Detection', () => {
     expect(result.revenueImpactValue).toBe(642800);
 
     // 4. Affected Segment
-    expect(result.affectedSegment).toBe(
-      'HDFC & ICICI Netbanking / High-Value Subscriptions',
-    );
+    expect(result.affectedSegment).toBe('HDFC & ICICI Netbanking / High-Value Subscriptions');
 
     // 5. AI Confidence
     expect(result.aiConfidence).toBe(94);
@@ -108,4 +96,3 @@ describe('Prompt 19: Revenue Incident Detection', () => {
     expect(formatted).toContain('6,42,800');
   });
 });
-
