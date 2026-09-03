@@ -5,6 +5,8 @@ import { protect, jsonBody, responseFailure, responseSuccess } from '@/server/ap
 import { orchestrate, type AgentContext } from '@/agents';
 import { evaluateAgentRun, logAgentRun } from '@/agents/logging';
 
+export const dynamic = 'force-dynamic';
+
 const requestSchema = z.object({
   objective: z.string().trim().min(1).max(500),
   input: z.record(z.unknown()).default({}),
