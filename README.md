@@ -34,6 +34,38 @@ If you want to view the project from your mobile phone or share it with anyone v
 
 ---
 
+## 📸 Output & Application Previews
+
+### 1. AI Revenue War Room (#1042)
+
+_Live incident response monitoring payment degradation (96.4% → 78.1%), ₹6,42,800 exposure, gateway telemetry, action boards, and multi-horizon forecasting:_
+
+<p align="center">
+  <img src="docs/images/war-room-active.jpg" alt="AI Revenue War Room Preview" width="100%" />
+</p>
+
+---
+
+### 2. Incident Resolved & Revenue Rescued
+
+_Interactive resolution lifecycle showing ₹5,84,200 rescued (90.9% recovery rate), 14 automatic actions, 2 escalations, and blocked unsafe actions:_
+
+<p align="center">
+  <img src="docs/images/incident-resolved.jpg" alt="Incident Resolved Preview" width="100%" />
+</p>
+
+---
+
+### 3. Production Readiness & 70/70 Automated Tests
+
+_Clean test execution across all 16 suites including the 12 explicit fail-safe modes, security boundaries, and RBAC:_
+
+<p align="center">
+  <img src="docs/images/test-suite-clip.svg" alt="Test Suite Terminal Clip" width="100%" />
+</p>
+
+---
+
 ## 🛡️ Financial Safety & Control Model
 
 RazorRecover AI enforces an unbreakable financial safety boundary: **AI models recommend actions, but deterministic policy engines, risk gates, and human reviewers authorize execution.**
