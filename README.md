@@ -11,15 +11,24 @@
 
 ---
 
-## 🌐 Live Output & Application Links
+## 🌐 How to Open the Live Application
 
-- **GitHub Repository**: [https://github.com/mishraayushmaan31-sys/razorrecover-ai](https://github.com/mishraayushmaan31-sys/razorrecover-ai)
-- **Project Homepage**: [https://mishraayushmaan31-sys.github.io/razorrecover-ai](https://mishraayushmaan31-sys.github.io/razorrecover-ai)
-- **Local Application Output**: [http://localhost:3000](http://localhost:3000)
-- **Health Check Endpoint**: [http://localhost:3000/api/health](http://localhost:3000/api/health)
+### 🟢 Option 1: Open Locally in Your Web Browser (Currently Running!)
+The application server is already compiled and actively running on your machine:
+👉 **[Open Live App at http://localhost:3000](http://localhost:3000)**
+
+- **Command Center & Workflow**: [http://localhost:3000](http://localhost:3000)
+- **AI Revenue War Room (#1042)**: [http://localhost:3000](http://localhost:3000) *(switch tab to War Room)*
 - **Incident Detection Telemetry**: [http://localhost:3000/api/incidents/detection](http://localhost:3000/api/incidents/detection)
-- **AI Revenue War Room**: [http://localhost:3000/api/incidents/war-room](http://localhost:3000/api/incidents/war-room)
-- **Revenue Forecast (1h, 4h, 12h, 24h)**: [http://localhost:3000/api/forecast](http://localhost:3000/api/forecast)
+- **Revenue Forecast API**: [http://localhost:3000/api/forecast](http://localhost:3000/api/forecast)
+- **Health Check Endpoint**: [http://localhost:3000/api/health](http://localhost:3000/api/health)
+
+---
+
+### ☁️ Option 2: Deploy Publicly to the Cloud in 1 Click (Vercel)
+If you want to view the project from your mobile phone or share it with anyone via a public HTTPS URL without running code on your computer, deploy it to Vercel with 1 click:
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fmishraayushmaan31-sys%2Frazorrecover-ai)
 
 ---
 
