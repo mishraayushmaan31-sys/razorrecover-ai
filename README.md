@@ -26,11 +26,18 @@ The application server is already compiled and actively running on your machine:
 
 ---
 
-## ☁️ Option 2: Deploy Publicly to the Cloud in 1 Click (Vercel)
+### ☁️ Option 2: Deploy Publicly to the Cloud in 1 Click (Vercel)
 
 If you want to view the project from your mobile phone or share it with anyone via a public HTTPS URL without running code on your computer, deploy it to Vercel with 1 click:
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fmishraayushmaan31-sys%2Frazorrecover-ai)
+
+---
+
+### 🚀 Option 3: Official Developer Site & Project Showcase
+
+Visit the official live GitHub Pages site for full architectural overviews and project links:
+👉 **[Open https://mishraayushmaan31-sys.github.io](https://mishraayushmaan31-sys.github.io)**
 
 ---
 
