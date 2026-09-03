@@ -42,7 +42,7 @@ jobs:
         run: npx prisma generate
 
       - name: Run Vitest Test Suites
-        run: npm test -- --coverage
+        run: npm test
         env:
           NODE_ENV: test
           APP_ENV: test
