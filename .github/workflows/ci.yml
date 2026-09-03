@@ -20,6 +20,8 @@ jobs:
       APP_ENV: test
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/razorrecover
       SESSION_SECRET: ci-test-environment-session-secret-at-least-32-chars
+      RAZORPAY_KEY_ID: rzp_test_placeholder_for_ci
+      RAZORPAY_KEY_SECRET: local_test_secret
       RAZORPAY_WEBHOOK_SECRET: local_webhook_secret
       ENABLE_DEMO_MODE: 'true'
       ENABLE_TEST_MODE: 'true'
