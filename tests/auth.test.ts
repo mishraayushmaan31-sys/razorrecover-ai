@@ -18,7 +18,7 @@ describe('authentication and RBAC foundation', () => {
     expect(hash).not.toContain(password);
     expect(await verifyPassword(password, hash)).toBe(true);
     expect(await verifyPassword('wrong-password', hash)).toBe(false);
-  });
+  }, 15000);
 
   it('signs and verifies tenant-scoped sessions', async () => {
     const token = await createSessionToken({

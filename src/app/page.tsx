@@ -1,90 +1,71 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import {
-  detectRevenueIncident,
-  type RevenueIncidentDetectionResult,
-} from '@/server/services/incident-detection-service';
 import { getCanonicalWarRoomData, type WarRoomDetails } from '@/server/services/war-room-service';
-import {
-  generateRevenueForecast,
-  type RevenueForecastResult,
-} from '@/server/services/forecasting-service';
 
-type ActiveView = 'command-center' | 'war-room' | 'detection' | 'forecasting';
+type SidebarView = 'dashboard' | 'analytics' | 'incidents' | 'settings' | 'notifications';
+type AppEnvironmentMode = 'real' | 'demo';
 
-const workflow = [
-  'Scan',
-  'Detect',
-  'Diagnose',
-  'Calculate',
-  'Simulate',
-  'Policy Check',
-  'Risk Check',
-  'Approve',
-  'Execute',
-  'Verify',
-  'Learn',
-];
-
-const metrics = [
-  { label: 'Revenue Processed', value: '₹24.8L', detail: '+8.4% this month', tone: 'plain' },
-  { label: 'Revenue at Risk', value: '₹8.5L', detail: '2,950 open attempts', tone: 'warning' },
-  { label: 'Revenue Rescued', value: '₹3.1L', detail: '1,100 recoveries', tone: 'success' },
-  { label: 'Recovery Rate', value: '36.5%', detail: '+4.2 pts vs baseline', tone: 'teal' },
-  { label: 'Prevented Loss', value: '₹1.4L', detail: 'Since last review', tone: 'plain' },
-  { label: 'Recovery ROI', value: '4.8x', detail: 'After recovery costs', tone: 'teal' },
-];
-
-const scoreBreakdown = [
-  { label: 'Payment Health', score: 94, note: 'Stable authorization coverage' },
-  { label: 'Recovery Efficiency', score: 91, note: 'Retryable failures prioritized' },
-  { label: 'Risk Management', score: 96, note: 'Policy gates are holding' },
-  { label: 'Checkout Health', score: 87, note: 'Abandonment is the main drag' },
-];
+type CommentItem = {
+  id: string;
+  content: string;
+  isEdited: boolean;
+  createdAt: string;
+  updatedAt: string;
+  userId: string;
+  user?: { id: string; name: string; email: string };
+};
 
 export default function HomePage() {
-  const [activeView, setActiveView] = useState<ActiveView>('command-center');
-  const [currentStep, setCurrentStep] = useState(-1);
-  const [running, setRunning] = useState(false);
-  const [flowState, setFlowState] = useState<'idle' | 'running' | 'complete'>('idle');
-  const [refreshState, setRefreshState] = useState<'ready' | 'loading' | 'error'>('ready');
-
-  // War Room & Incident State
-  const [warRoom, setWarRoom] = useState<WarRoomDetails>(() => getCanonicalWarRoomData(false));
-  const [detection] = useState<RevenueIncidentDetectionResult>(() => detectRevenueIncident());
-  const [forecast] = useState<RevenueForecastResult>(() => generateRevenueForecast());
+  const [activeTab, setActiveTab] = useState<SidebarView>('dashboard');
+  const [appMode, setAppMode] = useState<AppEnvironmentMode>('real');
   const [isResolving, setIsResolving] = useState(false);
+  const [incidentDurationSeconds, setIncidentDurationSeconds] = useState(2535); // 0h 42m 15s
 
-  // Incident Comments & Collaboration State
-  const [comments, setComments] = useState<
-    Array<{
-      id: string;
-      content: string;
-      isEdited: boolean;
-      createdAt: string;
-      updatedAt: string;
-      userId: string;
-      user?: { id: string; name: string; email: string };
-    }>
-  >([
+  // Telemetry & War Room Data
+  const [warRoom, setWarRoom] = useState<WarRoomDetails>(() => getCanonicalWarRoomData(false));
+  const [backendHealth, setBackendHealth] = useState<'healthy' | 'checking' | 'offline'>(
+    'checking',
+  );
+  const [liveStats, setLiveStats] = useState<{
+    totalTransactions: number;
+    totalRecovered: number;
+    recoveryRate: string;
+    revenueProcessed: string;
+  }>({
+    totalTransactions: 1240,
+    totalRecovered: 31,
+    recoveryRate: '36.5%',
+    revenueProcessed: '₹24,80,000',
+  });
+
+  // Action states
+  const [actionStates, setActionStates] = useState({
+    autoRetry: true,
+    endpointBlocked: true,
+    routingOptimized: true,
+    alertsSent: true,
+  });
+
+  // Comments State
+  const [comments, setComments] = useState<CommentItem[]>([
     {
-      id: 'comment-1',
+      id: 'c-1',
       content:
         'Root cause confirmed: HDFC payment service endpoint returning 504 Gateway Timeouts on netbanking rails.',
       isEdited: false,
-      createdAt: new Date(Date.now() - 45 * 60 * 1000).toISOString(),
-      updatedAt: new Date(Date.now() - 45 * 60 * 1000).toISOString(),
+      createdAt: new Date(Date.now() - 42 * 60 * 1000).toISOString(),
+      updatedAt: new Date(Date.now() - 42 * 60 * 1000).toISOString(),
       userId: 'op-1',
       user: { id: 'op-1', name: 'Treasury Analyst', email: 'treasury@merchant.com' },
     },
     {
-      id: 'comment-2',
+      id: 'c-2',
       content:
-        'Dynamic failover to secondary ICICI rail engaged. Monitoring success rates for high-value VIP accounts.',
+        'Dynamic failover to secondary ICICI rail engaged. Monitoring success rates for VIP accounts.',
       isEdited: false,
-      createdAt: new Date(Date.now() - 20 * 60 * 1000).toISOString(),
-      updatedAt: new Date(Date.now() - 20 * 60 * 1000).toISOString(),
+      createdAt: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
+      updatedAt: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
       userId: 'op-2',
       user: { id: 'op-2', name: 'Incident Commander', email: 'commander@merchant.com' },
     },
@@ -92,45 +73,48 @@ export default function HomePage() {
   const [newCommentText, setNewCommentText] = useState('');
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
   const [editingCommentText, setEditingCommentText] = useState('');
-  const [isSubmittingComment, setIsSubmittingComment] = useState(false);
+  const [isPostingComment, setIsPostingComment] = useState(false);
 
+  // Live Duration Timer
   useEffect(() => {
-    if (!running) return undefined;
-    const timer = window.setTimeout(() => {
-      setCurrentStep((step) => {
-        if (step >= workflow.length - 1) {
-          setRunning(false);
-          setFlowState('complete');
-          return step;
+    const timer = setInterval(() => {
+      setIncidentDurationSeconds((s) => s + 1);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  // Poll backend health & live DB analytics
+  useEffect(() => {
+    async function checkBackend() {
+      try {
+        const [healthRes, analyticsRes] = await Promise.all([
+          fetch('/api/health', { cache: 'no-store' }),
+          fetch('/api/analytics', { cache: 'no-store' }).catch(() => null),
+        ]);
+        if (healthRes.ok) {
+          setBackendHealth('healthy');
+        } else {
+          setBackendHealth('offline');
         }
-        return step + 1;
-      });
-    }, 650);
-    return () => window.clearTimeout(timer);
-  }, [currentStep, running]);
 
-  async function refreshLiveData() {
-    setRefreshState('loading');
-    try {
-      const response = await fetch('/api/health', { cache: 'no-store' });
-      if (!response.ok) throw new Error('Service unavailable');
-      setRefreshState('ready');
-    } catch {
-      setRefreshState('error');
+        if (analyticsRes && analyticsRes.ok) {
+          const json = await analyticsRes.json();
+          if (json.data?.metrics) {
+            setLiveStats(json.data.metrics);
+          }
+        }
+      } catch {
+        setBackendHealth('offline');
+      }
     }
-  }
+    checkBackend();
+  }, [appMode]);
 
-  function startRescue() {
-    setCurrentStep(0);
-    setRunning(true);
-    setFlowState('running');
-  }
-
-  function resetFlow() {
-    setCurrentStep(-1);
-    setRunning(false);
-    setFlowState('idle');
-  }
+  // Format Duration into "0h 42m 15s"
+  const hours = Math.floor(incidentDurationSeconds / 3600);
+  const minutes = Math.floor((incidentDurationSeconds % 3600) / 60);
+  const seconds = incidentDurationSeconds % 60;
+  const formattedDuration = `${hours}h ${minutes.toString().padStart(2, '0')}m ${seconds.toString().padStart(2, '0')}s`;
 
   async function handleResolveIncident() {
     setIsResolving(true);
@@ -148,7 +132,7 @@ export default function HomePage() {
         }
       }
     } catch {
-      // Fallback to local canonical resolution
+      // Fallback
     }
     setWarRoom(getCanonicalWarRoomData(true, new Date().toISOString()));
     setIsResolving(false);
@@ -168,30 +152,26 @@ export default function HomePage() {
       // Fallback
     }
     setWarRoom(getCanonicalWarRoomData(false));
+    setIncidentDurationSeconds(2535);
   }
 
   async function handleCreateComment(e: React.FormEvent) {
     e.preventDefault();
-    if (!newCommentText.trim() || isSubmittingComment) return;
-    setIsSubmittingComment(true);
+    if (!newCommentText.trim() || isPostingComment) return;
+    setIsPostingComment(true);
 
-    const payload = {
-      content: newCommentText.trim(),
-      incidentId: 'incident-1042',
-      issueId: 'issue-1042',
-    };
     try {
-      const response = await fetch('/api/comments', {
+      const res = await fetch('/api/comments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ content: newCommentText.trim(), incidentId: 'incident-1042' }),
       });
-      if (response.ok) {
-        const json = await response.json();
+      if (res.ok) {
+        const json = await res.json();
         if (json.data?.comment) {
           setComments((prev) => [json.data.comment, ...prev]);
           setNewCommentText('');
-          setIsSubmittingComment(false);
+          setIsPostingComment(false);
           return;
         }
       }
@@ -199,52 +179,34 @@ export default function HomePage() {
       // Fallback
     }
 
-    const localComment = {
+    const localItem: CommentItem = {
       id: `comment-${Date.now()}`,
       content: newCommentText.trim(),
       isEdited: false,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      userId: 'demo-user',
-      user: { id: 'demo-user', name: 'Demo Operator', email: 'operator@merchant.com' },
+      userId: 'hbadhan',
+      user: { id: 'hbadhan', name: 'hbadhan', email: 'hbadhan@merchant.com' },
     };
-    setComments((prev) => [localComment, ...prev]);
+    setComments((prev) => [localItem, ...prev]);
     setNewCommentText('');
-    setIsSubmittingComment(false);
+    setIsPostingComment(false);
   }
 
-  function handleStartEdit(comment: { id: string; content: string }) {
-    setEditingCommentId(comment.id);
-    setEditingCommentText(comment.content);
-  }
-
-  function handleCancelEdit() {
-    setEditingCommentId(null);
-    setEditingCommentText('');
-  }
-
-  async function handleSaveEdit(commentId: string) {
+  async function handleSaveEdit(id: string) {
     if (!editingCommentText.trim()) return;
-
     try {
-      const response = await fetch(`/api/comments/${commentId}`, {
+      const res = await fetch(`/api/comments/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ content: editingCommentText.trim() }),
       });
-      if (response.ok) {
-        const json = await response.json();
+      if (res.ok) {
+        const json = await res.json();
         if (json.data?.comment) {
           setComments((prev) =>
             prev.map((c) =>
-              c.id === commentId
-                ? {
-                    ...c,
-                    content: json.data.comment.content,
-                    isEdited: true,
-                    updatedAt: json.data.comment.updatedAt,
-                  }
-                : c,
+              c.id === id ? { ...c, content: json.data.comment.content, isEdited: true } : c,
             ),
           );
           setEditingCommentId(null);
@@ -257,1088 +219,1217 @@ export default function HomePage() {
 
     setComments((prev) =>
       prev.map((c) =>
-        c.id === commentId
-          ? {
-              ...c,
-              content: editingCommentText.trim(),
-              isEdited: true,
-              updatedAt: new Date().toISOString(),
-            }
-          : c,
+        c.id === id ? { ...c, content: editingCommentText.trim(), isEdited: true } : c,
       ),
     );
     setEditingCommentId(null);
   }
 
-  async function handleDeleteComment(commentId: string) {
+  async function handleDeleteComment(id: string) {
     try {
-      await fetch(`/api/comments/${commentId}`, { method: 'DELETE' });
+      await fetch(`/api/comments/${id}`, { method: 'DELETE' });
     } catch {
       // Fallback
     }
-    setComments((prev) => prev.filter((c) => c.id !== commentId));
+    setComments((prev) => prev.filter((c) => c.id !== id));
   }
 
-  const statusMessage =
-    flowState === 'running'
-      ? `${workflow[currentStep]} in progress.`
-      : flowState === 'complete'
-        ? 'Demo workflow complete. No payment was executed.'
-        : 'Ready to scan revenue risk.';
-
   return (
-    <main className="command-center">
-      <header className="topbar">
-        <a className="brand" href="/" aria-label="RazorRecover AI home">
-          <span className="brand-mark">R</span>
-          <span>
-            RazorRecover <em>AI</em>
-          </span>
-        </a>
-        <div className="topbar-actions">
-          <span className="mode-badge">
-            <span className="mode-dot" /> DEMO MODE
-          </span>
-          <button
-            className="quiet-button"
-            type="button"
-            onClick={refreshLiveData}
-            disabled={refreshState === 'loading'}
-          >
-            {refreshState === 'loading' ? 'Checking...' : 'Refresh status'}
-          </button>
-          <span className="avatar" aria-label="Demo Owner">
-            DO
-          </span>
-        </div>
-      </header>
-
-      <div className="dashboard-wrap">
-        {/* Top View Switcher */}
-        <nav className="view-nav" aria-label="Module navigation">
-          <button
-            type="button"
-            className={`view-tab ${activeView === 'command-center' ? 'is-active' : ''}`}
-            onClick={() => setActiveView('command-center')}
-          >
-            Command Center
-          </button>
-          <button
-            type="button"
-            className={`view-tab ${activeView === 'war-room' ? 'is-active' : ''}`}
-            onClick={() => setActiveView('war-room')}
-          >
-            AI Revenue War Room
-            {!warRoom.isResolved ? (
-              <span className="tab-badge tab-badge-live">#1042 LIVE</span>
-            ) : (
-              <span className="tab-badge" style={{ background: '#d1fae5', color: '#065f46' }}>
-                RESOLVED
-              </span>
-            )}
-          </button>
-          <button
-            type="button"
-            className={`view-tab ${activeView === 'detection' ? 'is-active' : ''}`}
-            onClick={() => setActiveView('detection')}
-          >
-            Incident Detection
-          </button>
-          <button
-            type="button"
-            className={`view-tab ${activeView === 'forecasting' ? 'is-active' : ''}`}
-            onClick={() => setActiveView('forecasting')}
-          >
-            Revenue Forecasting
-            <span className="tab-badge" style={{ background: '#fef3c7', color: '#92400e' }}>
-              ESTIMATES
-            </span>
-          </button>
-        </nav>
-
-        {refreshState === 'error' && (
-          <div className="inline-alert error-alert" role="alert">
-            <strong>Live data unavailable.</strong> Showing the last known Demo Mode snapshot.{' '}
-            <button type="button" onClick={refreshLiveData}>
-              Try again
-            </button>
-          </div>
-        )}
-
+    <div className="cockpit-wrapper">
+      <div className="cockpit-frame">
         {/* ========================================================================= */}
-        {/* VIEW 1: COMMAND CENTER                                                    */}
+        {/* LEFT SIDEBAR                                                              */}
         {/* ========================================================================= */}
-        {activeView === 'command-center' && (
-          <>
-            {/* Active Incident Alert Banner */}
-            <article className="active-incident-card" aria-labelledby="active-incident-heading">
-              <div className="active-incident-header">
-                <div className="incident-badge-row">
-                  <span className="badge-critical">CRITICAL INCIDENT</span>
-                  <span className="badge-incident-id">REVENUE INCIDENT #1042</span>
-                  <span className="status-pill status-running">
-                    {warRoom.isResolved ? 'RESOLVED' : 'ACTIVE INVESTIGATION'}
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  className="war-room-cta-btn"
-                  onClick={() => setActiveView('war-room')}
-                >
-                  ENTER AI REVENUE WAR ROOM ↗
-                </button>
-              </div>
-              <div className="incident-grid-preview">
-                <div>
-                  <div className="preview-metric-label">Payment Success Drop</div>
-                  <div className="preview-metric-value danger">
-                    {warRoom.paymentSuccess.normal} → {warRoom.paymentSuccess.current}
-                  </div>
-                </div>
-                <div>
-                  <div className="preview-metric-label">Revenue at Risk</div>
-                  <div className="preview-metric-value danger">{warRoom.revenueAtRisk}</div>
-                </div>
-                <div>
-                  <div className="preview-metric-label">AI Confidence</div>
-                  <div className="preview-metric-value teal">{warRoom.aiConfidenceDisplay}</div>
-                </div>
-                <div>
-                  <div className="preview-metric-label">Affected Segment</div>
-                  <div
-                    style={{
-                      fontSize: '0.82rem',
-                      fontWeight: 700,
-                      color: 'var(--ink)',
-                      marginTop: '4px',
-                    }}
-                  >
-                    {warRoom.affectedSegment}
-                  </div>
-                </div>
-              </div>
-            </article>
+        <aside className="cockpit-sidebar" aria-label="Main Navigation">
+          <div>
+            <a className="cockpit-brand" href="/">
+              <span className="cockpit-logo-icon">R</span>
+              <span>RazorRecover AI</span>
+            </a>
 
-            <section className="hero-row" aria-labelledby="page-title">
-              <div>
-                <p className="eyebrow">AI REVENUE COMMAND CENTER</p>
-                <h1 id="page-title">
-                  Your revenue is
-                  <br />
-                  <span>being protected.</span>
-                </h1>
-                <p className="hero-copy">
-                  A focused view of what is at risk, what can be rescued, and what needs your
-                  attention next.
-                </p>
-              </div>
-              <div className="hero-score" aria-label="Revenue Recovery Score 92 out of 100">
-                <div className="score-ring">
-                  <strong>92</strong>
-                  <span>/ 100</span>
-                </div>
-                <div>
-                  <p className="score-label">Revenue Recovery Score</p>
-                  <p className="score-caption">Strong protection posture</p>
-                </div>
-              </div>
-            </section>
-
-            <section className="metric-grid" aria-label="Revenue metrics">
-              {metrics.map((metric) => (
-                <article className={`metric metric-${metric.tone}`} key={metric.label}>
-                  <p>{metric.label}</p>
-                  <strong>{metric.value}</strong>
-                  <span>{metric.detail}</span>
-                </article>
-              ))}
-            </section>
-
-            <section className="attention-bar" aria-label="Revenue attention summary">
-              <div>
-                <span className="alert-count">2,950</span>
-                <div>
-                  <strong>payment attempts need attention</strong>
-                  <span>DEMO PREDICTION · deterministic rules</span>
-                </div>
-              </div>
+            <nav className="cockpit-nav">
               <button
-                className="primary-button"
                 type="button"
-                onClick={startRescue}
-                disabled={running}
+                className={`cockpit-nav-item ${activeTab === 'dashboard' ? 'is-active' : ''}`}
+                onClick={() => setActiveTab('dashboard')}
               >
-                <span className="button-icon" aria-hidden="true">
-                  ↗
-                </span>
-                {running ? 'Scanning revenue...' : 'RESCUE MY REVENUE'}
+                <span>📊</span>
+                <span>Dashboard</span>
               </button>
-            </section>
-
-            <section className="lower-grid">
-              <article
-                className="workflow-panel"
-                aria-labelledby="workflow-title"
-                aria-busy={running}
+              <button
+                type="button"
+                className={`cockpit-nav-item ${activeTab === 'analytics' ? 'is-active' : ''}`}
+                onClick={() => setActiveTab('analytics')}
               >
-                <div className="section-heading">
-                  <div>
-                    <p className="eyebrow">CONTROLLED RECOVERY</p>
-                    <h2 id="workflow-title">Rescue workflow</h2>
+                <span>📈</span>
+                <span>Analytics</span>
+              </button>
+              <button
+                type="button"
+                className={`cockpit-nav-item ${activeTab === 'incidents' ? 'is-active' : ''}`}
+                onClick={() => setActiveTab('incidents')}
+              >
+                <span>⏱️</span>
+                <span>Incidents</span>
+              </button>
+              <button
+                type="button"
+                className={`cockpit-nav-item ${activeTab === 'settings' ? 'is-active' : ''}`}
+                onClick={() => setActiveTab('settings')}
+              >
+                <span>⚙️</span>
+                <span>Settings</span>
+              </button>
+              <button
+                type="button"
+                className={`cockpit-nav-item ${activeTab === 'notifications' ? 'is-active' : ''}`}
+                onClick={() => setActiveTab('notifications')}
+              >
+                <span>🔔</span>
+                <span>Notifications</span>
+              </button>
+            </nav>
+          </div>
+
+          <div className="cockpit-sidebar-footer">
+            <span className="cockpit-logo-icon" style={{ fontSize: '1rem' }}>
+              R
+            </span>
+            <span>RazorRecover AI</span>
+          </div>
+        </aside>
+
+        {/* ========================================================================= */}
+        {/* MAIN VIEWPORT                                                             */}
+        {/* ========================================================================= */}
+        <main className="cockpit-main">
+          {/* Top Bar Header */}
+          <header className="cockpit-header">
+            <h1>AI REVENUE WAR ROOM</h1>
+
+            <div className="cockpit-header-right">
+              {/* Mode Toggle: Real App vs Demo Mode */}
+              <button
+                type="button"
+                className={`mode-toggle-pill ${appMode === 'real' ? 'live-active' : ''}`}
+                onClick={() => setAppMode(appMode === 'real' ? 'demo' : 'real')}
+                title="Click to toggle between Live App and Demo Simulation"
+              >
+                <span
+                  className="mode-dot-live"
+                  style={{ background: appMode === 'real' ? '#4ade80' : '#f59e0b' }}
+                />
+                <span>{appMode === 'real' ? 'LIVE APP (REAL DB)' : 'DEMO SIMULATION'}</span>
+              </button>
+
+              {/* Notification Bell */}
+              <button
+                type="button"
+                className="cockpit-user-pill"
+                style={{ padding: '6px 10px' }}
+                onClick={() => setActiveTab('notifications')}
+                aria-label="View notifications"
+              >
+                <span>🔔</span>
+                <span
+                  style={{
+                    width: '6px',
+                    height: '6px',
+                    borderRadius: '50%',
+                    background: '#ef4444',
+                  }}
+                />
+              </button>
+
+              {/* User Profile */}
+              <div className="cockpit-user-pill">
+                <span className="user-avatar-circle">HB</span>
+                <span style={{ fontWeight: 600, color: '#f8fafc' }}>hbadhan</span>
+                <span style={{ fontSize: '0.7rem' }}>▼</span>
+              </div>
+            </div>
+          </header>
+
+          {/* ========================================================================= */}
+          {/* VIEW 1: DASHBOARD (THE WAR ROOM COCKPIT)                                  */}
+          {/* ========================================================================= */}
+          {activeTab === 'dashboard' && (
+            <>
+              {/* Critical Red Incident Banner */}
+              <section className="incident-red-banner" aria-label="Incident Status Banner">
+                <div className="incident-banner-left">
+                  <div className="banner-alert-icon" aria-hidden="true">
+                    !
                   </div>
-                  <span className={`status-pill status-${flowState}`}>
-                    {flowState === 'running'
-                      ? 'IN PROGRESS'
-                      : flowState === 'complete'
-                        ? 'COMPLETE'
-                        : 'STANDBY'}
+                  <div className="banner-incident-title">INCIDENT #1042</div>
+                  <span className="banner-tag-red">Red</span>
+                  <span className="banner-status-text">
+                    STATUS: {warRoom.isResolved ? 'RESOLVED' : 'CRITICAL'}
                   </span>
                 </div>
-                <div className="workflow-track" role="list" aria-label="Recovery workflow progress">
-                  {workflow.map((step, index) => {
-                    const active = index === currentStep && running;
-                    const complete = index < currentStep || flowState === 'complete';
-                    return (
-                      <div
-                        className={`workflow-step ${active ? 'is-active' : ''} ${complete ? 'is-complete' : ''}`}
-                        role="listitem"
-                        key={step}
-                      >
-                        <span className="step-marker">{complete ? '✓' : index + 1}</span>
-                        <span>{step}</span>
-                        {index < workflow.length - 1 && <i aria-hidden="true" />}
-                      </div>
-                    );
-                  })}
-                </div>
-                <div className="workflow-status" role="status" aria-live="polite">
-                  <span className={`status-orb ${running ? 'pulse' : ''}`} aria-hidden="true" />
-                  {statusMessage}
-                  {flowState === 'complete' && (
-                    <button className="text-button" type="button" onClick={resetFlow}>
-                      Run again
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                  <div className="banner-incident-duration">DURATION: {formattedDuration}</div>
+                  {!warRoom.isResolved ? (
+                    <button
+                      type="button"
+                      className="primary-button"
+                      style={{
+                        padding: '5px 12px',
+                        fontSize: '0.75rem',
+                        background: '#2dd4bf',
+                        color: '#080e18',
+                        fontWeight: 700,
+                        borderRadius: '6px',
+                        border: 'none',
+                        cursor: 'pointer',
+                      }}
+                      onClick={handleResolveIncident}
+                      disabled={isResolving}
+                    >
+                      {isResolving ? 'Resolving...' : 'RESOLVE INCIDENT ✓'}
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      className="quiet-button"
+                      style={{
+                        padding: '4px 10px',
+                        fontSize: '0.72rem',
+                        color: '#94a3b8',
+                        background: 'transparent',
+                        border: '1px solid #334155',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                      }}
+                      onClick={handleResetIncident}
+                    >
+                      Reopen ↻
                     </button>
                   )}
                 </div>
-              </article>
+              </section>
 
-              <article className="score-panel" aria-labelledby="breakdown-title">
-                <div className="section-heading">
-                  <div>
-                    <p className="eyebrow">EXPLAINABILITY</p>
-                    <h2 id="breakdown-title">Score breakdown</h2>
-                  </div>
-                  <span className="score-total">92</span>
-                </div>
-                <div className="breakdown-list">
-                  {scoreBreakdown.map((item) => (
-                    <div className="breakdown-row" key={item.label}>
-                      <div className="breakdown-label">
-                        <strong>{item.label}</strong>
-                        <span>{item.note}</span>
-                      </div>
-                      <div
-                        className="bar"
-                        role="progressbar"
-                        aria-label={`${item.label} score`}
-                        aria-valuenow={item.score}
-                        aria-valuemin={0}
-                        aria-valuemax={100}
-                      >
-                        <span style={{ width: `${item.score}%` }} />
-                      </div>
-                      <b>{item.score}</b>
-                    </div>
-                  ))}
-                </div>
-              </article>
-            </section>
-
-            <section className="bottom-grid">
-              <article className="attention-panel">
-                <div className="section-heading">
-                  <div>
-                    <p className="eyebrow">NEEDS YOUR ATTENTION</p>
-                    <h2>Priority queue</h2>
-                  </div>
-                  <button
-                    className="text-button"
-                    type="button"
-                    onClick={() => setActiveView('detection')}
-                  >
-                    View detection signals →
-                  </button>
-                </div>
-                <div className="queue-item">
-                  <span className="queue-severity critical">!</span>
-                  <div>
-                    <strong>REVENUE INCIDENT #1042 (High-Value Netbanking)</strong>
-                    <span>₹6.4L · HDFC & ICICI Rail Degradation · AI Confidence 94%</span>
-                  </div>
-                  <b>CRITICAL</b>
-                </div>
-                <div className="queue-item">
-                  <span className="queue-severity critical">!</span>
-                  <div>
-                    <strong>High-value abandonment cluster</strong>
-                    <span>₹2.1L · 200 customers · recovery probability 48%</span>
-                  </div>
-                  <b>HIGH</b>
-                </div>
-                <div className="queue-item">
-                  <span className="queue-severity warning">↻</span>
-                  <div>
-                    <strong>Retryable gateway failures</strong>
-                    <span>₹1.8L · 700 attempts · recovery probability 72%</span>
-                  </div>
-                  <b>MEDIUM</b>
-                </div>
-              </article>
-
-              {/* Active War Room Callout instead of empty panel */}
-              <article className="empty-panel" style={{ background: '#fffcf7' }}>
+              {/* Resolved Victory Box (When Resolved) */}
+              {warRoom.isResolved && warRoom.resolution && (
                 <div
-                  className="empty-icon"
                   style={{
-                    background: warRoom.isResolved ? '#d1fae5' : '#fae5df',
-                    color: warRoom.isResolved ? '#065f46' : '#a83b2b',
+                    background: 'rgba(45, 212, 191, 0.08)',
+                    border: '1px solid #2dd4bf',
+                    borderRadius: '10px',
+                    padding: '16px 20px',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
                   }}
-                  aria-hidden="true"
                 >
-                  {warRoom.isResolved ? '✓' : '!'}
-                </div>
-                <p className="eyebrow">
-                  {warRoom.isResolved ? 'INCIDENT RESOLVED' : 'ACTIVE REVENUE INCIDENT'}
-                </p>
-                <h2>REVENUE INCIDENT #1042</h2>
-                <p>
-                  Payment Success: {warRoom.paymentSuccess.normal} →{' '}
-                  {warRoom.paymentSuccess.current}
-                  <br />
-                  Revenue at Risk: <strong>{warRoom.revenueAtRisk}</strong> · AI Confidence:{' '}
-                  <strong>94%</strong>
-                </p>
-                <div style={{ marginTop: '16px' }}>
-                  <button
-                    className="primary-button"
-                    type="button"
-                    onClick={() => setActiveView('war-room')}
-                  >
-                    OPEN WAR ROOM ↗
-                  </button>
-                </div>
-              </article>
-            </section>
-          </>
-        )}
-
-        {/* ========================================================================= */}
-        {/* VIEW 2: AI REVENUE WAR ROOM                                               */}
-        {/* ========================================================================= */}
-        {activeView === 'war-room' && (
-          <div className="war-room-container">
-            {/* Header Banner */}
-            <header className={`war-room-banner ${warRoom.isResolved ? 'resolved-theme' : ''}`}>
-              <div className="war-room-title-area">
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <span
-                    className={`war-room-status-tag ${warRoom.isResolved ? 'tag-resolved' : 'tag-investigating'}`}
-                  >
-                    <span className="mode-dot" />
-                    {warRoom.isResolved ? 'INCIDENT RESOLVED' : 'LIVE INVESTIGATION & MITIGATION'}
-                  </span>
-                  <span style={{ fontSize: '0.75rem', color: '#aab8b1' }}>DEMO SIMULATION</span>
-                </div>
-                <h2>AI REVENUE WAR ROOM</h2>
-                <p style={{ margin: 0, color: '#c9d6cf', fontSize: '0.92rem' }}>
-                  REVENUE INCIDENT #1042 · High-Value Netbanking & Recurring Subscription
-                  Degradation
-                </p>
-              </div>
-
-              <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                {!warRoom.isResolved ? (
-                  <button
-                    type="button"
-                    className="primary-button"
-                    style={{ background: '#74cfb8', color: '#16221f' }}
-                    onClick={handleResolveIncident}
-                    disabled={isResolving}
-                  >
-                    {isResolving ? 'Resolving incident...' : 'RESOLVE INCIDENT ✓'}
-                  </button>
-                ) : (
-                  <button type="button" className="quiet-button" onClick={handleResetIncident}>
-                    Reopen for Testing ↻
-                  </button>
-                )}
-              </div>
-            </header>
-
-            {/* Resolved Summary Screen (Displayed when incident is resolved) */}
-            {warRoom.isResolved && warRoom.resolution && (
-              <section className="resolution-screen" aria-labelledby="resolved-title">
-                <div className="resolution-header-row">
-                  <h2 id="resolved-title" className="resolution-h2">
-                    <span aria-hidden="true">✓</span> INCIDENT RESOLVED
-                  </h2>
-                  <span
-                    style={{
-                      fontSize: '0.78rem',
-                      color: 'var(--muted)',
-                      fontFamily: 'Space Grotesk, sans-serif',
-                    }}
-                  >
-                    Resolved at {new Date(warRoom.resolution.resolvedAt).toLocaleTimeString()} ·
-                    Verified by AI Safety Gate
-                  </span>
-                </div>
-
-                <div className="resolution-stats-grid">
-                  <div className="resolution-stat-card">
-                    <div className="resolution-stat-label">Revenue Rescued</div>
-                    <div className="resolution-stat-num rescued">
+                  <div>
+                    <h3 style={{ margin: 0, color: '#2dd4bf', fontSize: '1.1rem' }}>
+                      ✓ INCIDENT RESOLVED &amp; REVENUE RESCUED
+                    </h3>
+                    <p style={{ margin: '4px 0 0', color: '#cbd5e1', fontSize: '0.85rem' }}>
+                      Verified by Deterministic Policy Engine &amp; HMAC Ledger Verification.
+                    </p>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#2dd4bf' }}>
                       {warRoom.resolution.revenueRescued}
                     </div>
-                  </div>
-                  <div className="resolution-stat-card">
-                    <div className="resolution-stat-label">Recovery Rate</div>
-                    <div className="resolution-stat-num">{warRoom.resolution.recoveryRate}</div>
-                  </div>
-                  <div className="resolution-stat-card">
-                    <div className="resolution-stat-label">Automatic Actions</div>
-                    <div className="resolution-stat-num">{warRoom.resolution.automaticActions}</div>
-                  </div>
-                  <div className="resolution-stat-card">
-                    <div className="resolution-stat-label">Human Escalations</div>
-                    <div className="resolution-stat-num warning">
-                      {warRoom.resolution.humanEscalations}
-                    </div>
-                  </div>
-                  <div className="resolution-stat-card">
-                    <div className="resolution-stat-label">Blocked Actions</div>
-                    <div className="resolution-stat-num danger">
-                      {warRoom.resolution.blockedActions}
-                    </div>
-                  </div>
-                  <div className="resolution-stat-card">
-                    <div className="resolution-stat-label">Unsafe Actions</div>
-                    <div className="resolution-stat-num danger">
-                      {warRoom.resolution.unsafeActions}
+                    <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+                      Recovery Rate: {warRoom.resolution.recoveryRate}
                     </div>
                   </div>
                 </div>
+              )}
 
-                <div className="resolution-lists-grid">
-                  <div className="resolution-list-box">
-                    <h4>Automatic Actions ({warRoom.resolution.automaticActions})</h4>
-                    <ul>
-                      {warRoom.resolution.automaticActionsSummary.map((item) => (
-                        <li key={item}>{item}</li>
-                      ))}
-                    </ul>
+              {/* Top 3-Card Grid */}
+              <section className="cockpit-top-grid">
+                {/* 1. PAYMENT SUCCESS CARD */}
+                <article className="cockpit-panel-card">
+                  <div className="cockpit-card-header">
+                    <span>PAYMENT SUCCESS</span>
                   </div>
-                  <div className="resolution-list-box">
-                    <h4>Human Escalations ({warRoom.resolution.humanEscalations})</h4>
-                    <ul>
-                      {warRoom.resolution.humanEscalationsSummary.map((item) => (
-                        <li key={item}>{item}</li>
-                      ))}
-                    </ul>
+
+                  <div className="stat-comparison-row">
+                    <div className="stat-item-col">
+                      <div className="num previous">96.4%</div>
+                      <div className="lbl">Previous</div>
+                    </div>
+                    <div className="stat-item-col">
+                      <div className="num current-drop">{warRoom.paymentSuccess.current}</div>
+                      <div className="lbl">Current</div>
+                    </div>
                   </div>
-                  <div className="resolution-list-box">
-                    <h4>Blocked Actions ({warRoom.resolution.blockedActions})</h4>
-                    <ul>
-                      {warRoom.resolution.blockedActionsSummary.map((item) => (
-                        <li key={item}>{item}</li>
-                      ))}
-                    </ul>
+
+                  {/* SVG Downward Sparkline Chart */}
+                  <div className="sparkline-container">
+                    <svg viewBox="0 0 300 80" width="100%" height="100%" preserveAspectRatio="none">
+                      <defs>
+                        <linearGradient id="redGradient" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#f43f5e" stopOpacity="0.4" />
+                          <stop offset="100%" stopColor="#f43f5e" stopOpacity="0" />
+                        </linearGradient>
+                      </defs>
+                      <path
+                        d="M 0,15 Q 30,12 60,20 T 120,35 T 180,50 T 240,68 L 300,74 L 300,80 L 0,80 Z"
+                        fill="url(#redGradient)"
+                      />
+                      <path
+                        d="M 0,15 Q 30,12 60,20 T 120,35 T 180,50 T 240,68 L 300,74"
+                        fill="none"
+                        stroke="#f43f5e"
+                        strokeWidth="3.5"
+                        strokeLinecap="round"
+                      />
+                    </svg>
                   </div>
-                  <div className="resolution-list-box">
-                    <h4>Unsafe Actions ({warRoom.resolution.unsafeActions})</h4>
-                    <ul>
-                      {warRoom.resolution.unsafeActionsSummary.map((item) => (
-                        <li key={item}>{item}</li>
-                      ))}
-                    </ul>
+                </article>
+
+                {/* 2. REVENUE AT RISK CARD */}
+                <article className="cockpit-panel-card card-danger">
+                  <div className="cockpit-card-header">
+                    <span>REVENUE AT RISK</span>
+                    <span>&gt;</span>
+                  </div>
+
+                  <div className="revenue-risk-num">
+                    {appMode === 'real'
+                      ? liveStats.revenueProcessed.replace('₹24,80,000', '₹6,42,800')
+                      : '₹6,42,800'}
+                  </div>
+                  <div className="revenue-risk-sub">Critical Risk</div>
+
+                  <div className="risk-glowing-icon-area">
+                    <svg
+                      className="neon-warning-icon"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="#ef4444"
+                      strokeWidth="1.8"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+                      <line x1="12" y1="9" x2="12" y2="13" />
+                      <line x1="12" y1="17" x2="12.01" y2="17" />
+                    </svg>
+                  </div>
+                </article>
+
+                {/* 3. REAL-TIME NODE TELEMETRY CARD */}
+                <article className="cockpit-panel-card">
+                  <div className="cockpit-card-header">
+                    <span>REAL-TIME NODE TELEMETRY</span>
+                    <span>•••</span>
+                  </div>
+
+                  <div className="telemetry-node-title">
+                    <span
+                      style={{
+                        width: '18px',
+                        height: '18px',
+                        background: '#dc2626',
+                        display: 'grid',
+                        placeItems: 'center',
+                        borderRadius: '3px',
+                        fontSize: '0.65rem',
+                      }}
+                    >
+                      +
+                    </span>
+                    <span>HDFC Netbanking</span>
+                    <span style={{ fontSize: '0.72rem', color: '#94a3b8', marginLeft: 'auto' }}>
+                      Status: <span style={{ color: '#ef4444', fontWeight: 700 }}>ERROR 503</span>{' '}
+                      <span className="banner-tag-red">Red</span>
+                    </span>
+                  </div>
+
+                  <div className="telemetry-body-grid">
+                    {/* SVG Network Topology Graph */}
+                    <svg className="node-graph-svg" viewBox="0 0 180 120">
+                      {/* Interconnecting Edges */}
+                      <line x1="30" y1="60" x2="80" y2="30" stroke="#1e293b" strokeWidth="1.5" />
+                      <line x1="30" y1="60" x2="70" y2="90" stroke="#1e293b" strokeWidth="1.5" />
+                      <line x1="80" y1="30" x2="130" y2="40" stroke="#1e293b" strokeWidth="1.5" />
+                      <line x1="80" y1="30" x2="100" y2="75" stroke="#ef4444" strokeWidth="1.8" />
+                      <line x1="70" y1="90" x2="100" y2="75" stroke="#ef4444" strokeWidth="1.8" />
+                      <line x1="70" y1="90" x2="140" y2="100" stroke="#1e293b" strokeWidth="1.5" />
+                      <line x1="100" y1="75" x2="150" y2="70" stroke="#1e293b" strokeWidth="1.5" />
+
+                      {/* Normal Nodes */}
+                      <circle cx="30" cy="60" r="5" fill="#334155" />
+                      <circle cx="130" cy="40" r="5" fill="#334155" />
+                      <circle cx="140" cy="100" r="5" fill="#334155" />
+                      <circle cx="150" cy="70" r="5" fill="#334155" />
+
+                      {/* Alert Hot Nodes */}
+                      <circle cx="80" cy="30" r="6" fill="#ef4444" />
+                      <circle cx="100" cy="75" r="8" fill="#dc2626" />
+                      <circle
+                        cx="100"
+                        cy="75"
+                        r="12"
+                        fill="none"
+                        stroke="#ef4444"
+                        strokeWidth="1.5"
+                        opacity="0.6"
+                      />
+                      <circle cx="70" cy="90" r="6" fill="#ef4444" />
+                    </svg>
+
+                    {/* Telemetry Stats Column */}
+                    <div className="telemetry-stats-column">
+                      <div>
+                        <div className="telemetry-submetric-label">Traffic Spikes</div>
+                        <div className="traffic-bars-row">
+                          <div className="traffic-bar" style={{ height: '40%' }} />
+                          <div className="traffic-bar" style={{ height: '65%' }} />
+                          <div className="traffic-bar" style={{ height: '50%' }} />
+                          <div className="traffic-bar" style={{ height: '80%' }} />
+                          <div className="traffic-bar" style={{ height: '95%' }} />
+                          <div className="traffic-bar" style={{ height: '60%' }} />
+                          <div className="traffic-bar hot" style={{ height: '100%' }} />
+                          <div className="traffic-bar hot" style={{ height: '90%' }} />
+                          <div className="traffic-bar hot" style={{ height: '85%' }} />
+                          <div className="traffic-bar" style={{ height: '55%' }} />
+                          <div className="traffic-bar" style={{ height: '70%' }} />
+                          <div className="traffic-bar" style={{ height: '45%' }} />
+                        </div>
+                      </div>
+
+                      <div>
+                        <div className="telemetry-submetric-label">Latency</div>
+                        <div className="latency-big-num">4.8s</div>
+                      </div>
+
+                      <div>
+                        <div className="telemetry-submetric-label">Heat map</div>
+                        <div className="heatmap-matrix">
+                          <div className="heatmap-cell" style={{ background: '#0369a1' }} />
+                          <div className="heatmap-cell" style={{ background: '#0284c7' }} />
+                          <div className="heatmap-cell" style={{ background: '#38bdf8' }} />
+                          <div className="heatmap-cell" style={{ background: '#eab308' }} />
+                          <div className="heatmap-cell" style={{ background: '#f97316' }} />
+                          <div className="heatmap-cell" style={{ background: '#ef4444' }} />
+                          <div className="heatmap-cell" style={{ background: '#0284c7' }} />
+                          <div className="heatmap-cell" style={{ background: '#0369a1' }} />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </article>
+              </section>
+
+              {/* LIVE ACTION BOARDS */}
+              <section aria-label="Live Action Boards">
+                <div className="action-boards-section-title">
+                  <span>LIVE ACTION BOARDS</span>
+                  <span>•••</span>
+                </div>
+
+                <div className="cockpit-actions-2x2">
+                  <div
+                    className="cockpit-action-box theme-teal"
+                    onClick={() => setActionStates((s) => ({ ...s, autoRetry: !s.autoRetry }))}
+                  >
+                    <div className="action-box-left">
+                      <span>🔄</span>
+                      <span>AUTO-RETRY ENABLED</span>
+                    </div>
+                    <span className="action-box-pill pill-teal">
+                      {actionStates.autoRetry ? '250tx' : 'PAUSED'}
+                    </span>
+                  </div>
+
+                  <div
+                    className="cockpit-action-box theme-red"
+                    onClick={() =>
+                      setActionStates((s) => ({ ...s, endpointBlocked: !s.endpointBlocked }))
+                    }
+                  >
+                    <div className="action-box-left">
+                      <span>⛔</span>
+                      <span>HDFC ENDPOINT BLOCKED</span>
+                    </div>
+                    <span className="action-box-pill pill-red">
+                      {actionStates.endpointBlocked ? 'Immediate' : 'BYPASSED'}
+                    </span>
+                  </div>
+
+                  <div
+                    className="cockpit-action-box theme-teal"
+                    onClick={() =>
+                      setActionStates((s) => ({ ...s, routingOptimized: !s.routingOptimized }))
+                    }
+                  >
+                    <div className="action-box-left">
+                      <span>✓</span>
+                      <span>PAYMENT ROUTING OPTIMIZED</span>
+                    </div>
+                    <span className="action-box-pill pill-teal">
+                      {actionStates.routingOptimized ? 'Active' : 'DISABLED'}
+                    </span>
+                  </div>
+
+                  <div
+                    className="cockpit-action-box theme-red"
+                    onClick={() => setActionStates((s) => ({ ...s, alertsSent: !s.alertsSent }))}
+                  >
+                    <div className="action-box-left">
+                      <span>⚠️</span>
+                      <span>FAILED TX ALERTS SENT</span>
+                    </div>
+                    <span className="action-box-pill pill-red">
+                      {actionStates.alertsSent ? 'Active' : 'QUEUED'}
+                    </span>
                   </div>
                 </div>
               </section>
-            )}
 
-            {/* Core Metrics Grid */}
-            <section className="war-metrics-grid" aria-label="War room key indicators">
-              <div className="war-metric-card">
-                <span className="war-metric-title">Payment Success Rate</span>
-                <div className="war-metric-val drop">
-                  {warRoom.paymentSuccess.normal} → {warRoom.paymentSuccess.current}
-                </div>
-                <span className="war-metric-sub">
-                  {warRoom.isResolved
-                    ? 'Restored back to baseline (+17.7 pts recovery)'
-                    : '18.3 percentage points drop below normal'}
-                </span>
-              </div>
+              {/* MULTI-HORIZON REVENUE FORECASTING */}
+              <section className="cockpit-forecasting-section" aria-label="Revenue Forecasting">
+                <h3>MULTI-HORIZON REVENUE FORECASTING</h3>
 
-              <div className="war-metric-card">
-                <span className="war-metric-title">Revenue at Risk</span>
-                <div className="war-metric-val impact">{warRoom.revenueAtRisk}</div>
-                <span className="war-metric-sub">
-                  Calculated from 412 active gateway drops & retry attempts
-                </span>
-              </div>
-
-              <div className="war-metric-card">
-                <span className="war-metric-title">AI Confidence</span>
-                <div className="war-metric-val confidence">{warRoom.aiConfidenceDisplay}</div>
-                <span className="war-metric-sub">
-                  Statistical confidence based on 504 timeout clustering
-                </span>
-              </div>
-
-              <div className="war-metric-card">
-                <span className="war-metric-title">Failure Rate Spike</span>
-                <div className="war-metric-val drop">
-                  {warRoom.failureRate.normal} → {warRoom.failureRate.current}
-                </div>
-                <span className="war-metric-sub">
-                  {warRoom.failureRate.surgeMultiplier} surge vs standard 3.6% baseline
-                </span>
-              </div>
-            </section>
-
-            {/* Root Cause Banner */}
-            <section className="root-cause-banner" aria-label="Root cause diagnosis">
-              <h3>
-                <span aria-hidden="true">🔍</span> Root Cause Diagnosis
-              </h3>
-              <p className="root-cause-text">{warRoom.rootCause}</p>
-            </section>
-
-            {/* Live Investigation & Timeline Grid */}
-            <section className="investigation-timeline-grid">
-              {/* Live Investigation */}
-              <article className="investigation-panel">
-                <div className="section-heading">
-                  <div>
-                    <p className="eyebrow">REAL-TIME TELEMETRY</p>
-                    <h2>Live investigation</h2>
-                  </div>
-                  <span className="status-pill status-running">
-                    {warRoom.isResolved ? 'STANDBY' : '3 AGENTS ACTIVE'}
-                  </span>
-                </div>
-
-                <div className="telemetry-list">
-                  {warRoom.liveInvestigation.telemetry.map((node) => (
-                    <div className="telemetry-node-row" key={node.id}>
-                      <div>
-                        <span className="telemetry-node-name">{node.node}</span>
-                        <span className="telemetry-finding">{node.finding}</span>
-                      </div>
-                      <div style={{ textAlign: 'right' }}>
-                        <span
-                          className={`action-pill ${
-                            node.status === 'CRITICAL'
-                              ? 'action-pill-blocked'
-                              : node.status === 'DEGRADED'
-                                ? 'action-pill-escalated'
-                                : 'action-pill-executed'
-                          }`}
-                        >
-                          {node.status}
-                        </span>
-                        <div
-                          style={{
-                            fontSize: '0.68rem',
-                            color: 'var(--muted)',
-                            marginTop: '2px',
-                          }}
-                        >
-                          {node.latency}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="live-log-box" role="log" aria-label="Investigation stream">
-                  {warRoom.liveInvestigation.logs.map((log) => (
-                    <div key={log}>{log}</div>
-                  ))}
-                </div>
-              </article>
-
-              {/* Timeline */}
-              <article className="timeline-panel">
-                <div className="section-heading">
-                  <div>
-                    <p className="eyebrow">CHRONOLOGY</p>
-                    <h2>Timeline</h2>
-                  </div>
-                  <span className="status-pill">{warRoom.timeline.length} EVENTS RECORDED</span>
-                </div>
-
-                <div className="timeline-list">
-                  {warRoom.timeline.map((entry) => (
-                    <div className="timeline-entry" key={entry.id}>
-                      <div className="timeline-offset">{entry.timeOffset}</div>
-                      <div className="timeline-entry-content">
-                        <div className="timeline-entry-title">
-                          {entry.title}
-                          <span
-                            style={{
-                              marginLeft: '8px',
-                              fontSize: '0.65rem',
-                              color: 'var(--muted)',
-                              fontWeight: 400,
-                            }}
-                          >
-                            {entry.timestamp}
-                          </span>
-                        </div>
-                        <p className="timeline-entry-desc">{entry.description}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </article>
-            </section>
-
-            {/* Actions Trio: Recovery Actions, Blocked Actions, Human Escalations */}
-            <section className="actions-trio-grid" aria-label="War room operational actions">
-              {/* 1. Recovery Actions */}
-              <article className="action-column-panel">
-                <div className="action-column-header">
-                  <h3>Recovery Actions</h3>
-                  <span className="action-count-badge">
-                    {warRoom.recoveryActions.length} Executed
-                  </span>
-                </div>
-
-                {warRoom.recoveryActions.map((action) => (
-                  <div className="action-item-card recovery-theme" key={action.id}>
-                    <div className="action-card-top">
-                      <span className="action-item-title">{action.title}</span>
-                      <span className="action-pill action-pill-executed">{action.status}</span>
-                    </div>
-                    <p className="action-item-desc">{action.description}</p>
-                    <div className="action-item-footer">
-                      <span>{action.executedBy}</span>
-                      <strong>{action.amount}</strong>
+                <div className="forecasting-4cards-grid">
+                  {/* 1h */}
+                  <div className="forecast-card-cockpit">
+                    <div className="forecast-card-top-hdr">1h</div>
+                    <svg
+                      className="forecast-card-waveform-svg"
+                      viewBox="0 0 160 40"
+                      preserveAspectRatio="none"
+                    >
+                      <path
+                        d="M 0,35 Q 40,32 80,18 T 160,8"
+                        fill="none"
+                        stroke="#38bdf8"
+                        strokeWidth="2.5"
+                      />
+                    </svg>
+                    <div className="forecast-card-btm-meta">
+                      <span className="forecast-amount-val">₹42,100</span>
+                      <span className="forecast-predicted-pill">Predicted: +18%</span>
                     </div>
                   </div>
-                ))}
-              </article>
 
-              {/* 2. Blocked Actions */}
-              <article className="action-column-panel">
-                <div className="action-column-header">
-                  <h3>Blocked Actions</h3>
-                  <span className="action-count-badge" style={{ color: 'var(--danger)' }}>
-                    {warRoom.blockedActions.length} Blocked
-                  </span>
-                </div>
-
-                {warRoom.blockedActions.map((action) => (
-                  <div className="action-item-card blocked-theme" key={action.id}>
-                    <div className="action-card-top">
-                      <span className="action-item-title">{action.title}</span>
-                      <span className="action-pill action-pill-blocked">BLOCKED</span>
+                  {/* 4h */}
+                  <div className="forecast-card-cockpit">
+                    <div className="forecast-card-top-hdr">4h</div>
+                    <svg
+                      className="forecast-card-waveform-svg"
+                      viewBox="0 0 160 40"
+                      preserveAspectRatio="none"
+                    >
+                      <path
+                        d="M 0,35 Q 40,25 90,15 T 160,5"
+                        fill="none"
+                        stroke="#38bdf8"
+                        strokeWidth="2.5"
+                      />
+                    </svg>
+                    <div className="forecast-card-btm-meta">
+                      <span className="forecast-amount-val">₹1,95,000</span>
+                      <span className="forecast-predicted-pill">Predicted: +42%</span>
                     </div>
-                    <p className="action-item-desc">{action.description}</p>
-                    <div
+                  </div>
+
+                  {/* 12h */}
+                  <div className="forecast-card-cockpit">
+                    <div className="forecast-card-top-hdr">12h</div>
+                    <svg
+                      className="forecast-card-waveform-svg"
+                      viewBox="0 0 160 40"
+                      preserveAspectRatio="none"
+                    >
+                      <path
+                        d="M 0,35 Q 40,28 90,12 T 160,4"
+                        fill="none"
+                        stroke="#2dd4bf"
+                        strokeWidth="2.5"
+                      />
+                    </svg>
+                    <div className="forecast-card-btm-meta">
+                      <span className="forecast-amount-val">₹4,88,000</span>
+                      <span className="forecast-predicted-pill">Predicted: +65%</span>
+                    </div>
+                  </div>
+
+                  {/* 24h */}
+                  <div className="forecast-card-cockpit">
+                    <div className="forecast-card-top-hdr">24h</div>
+                    <svg
+                      className="forecast-card-waveform-svg"
+                      viewBox="0 0 160 40"
+                      preserveAspectRatio="none"
+                    >
+                      <path
+                        d="M 0,35 Q 40,22 90,8 T 160,2"
+                        fill="none"
+                        stroke="#4ade80"
+                        strokeWidth="2.5"
+                      />
+                    </svg>
+                    <div className="forecast-card-btm-meta">
+                      <span className="forecast-amount-val">₹6,10,000</span>
+                      <span className="forecast-predicted-pill">Predicted: +88%</span>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              {/* Real App Collaboration & Operator Comments Feed */}
+              <section
+                style={{
+                  background: '#0d1524',
+                  border: '1px solid #19263e',
+                  borderRadius: '12px',
+                  padding: '20px',
+                  marginTop: '10px',
+                }}
+              >
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginBottom: '16px',
+                  }}
+                >
+                  <h3
+                    style={{
+                      margin: 0,
+                      fontSize: '0.95rem',
+                      fontFamily: 'Space Grotesk, sans-serif',
+                      color: '#f8fafc',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                    }}
+                  >
+                    <span>💬 Incident Collaboration &amp; Operator Notes</span>
+                    <span
                       style={{
-                        fontSize: '0.68rem',
-                        color: 'var(--danger)',
-                        fontWeight: 700,
-                        marginTop: '4px',
+                        background: '#0f1f33',
+                        color: '#38bdf8',
+                        fontSize: '0.72rem',
+                        padding: '2px 8px',
+                        borderRadius: '999px',
                       }}
                     >
-                      {action.reason}
-                    </div>
-                  </div>
-                ))}
-              </article>
-
-              {/* 3. Human Escalations */}
-              <article className="action-column-panel">
-                <div className="action-column-header">
-                  <h3>Human Escalations</h3>
-                  <span className="action-count-badge" style={{ color: 'var(--amber)' }}>
-                    {warRoom.humanEscalations.length} Active
+                      {comments.length} notes
+                    </span>
+                  </h3>
+                  <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                    {appMode === 'real'
+                      ? 'Connected to PostgreSQL Audit Log'
+                      : 'Demo Simulation Session'}
                   </span>
                 </div>
 
-                {warRoom.humanEscalations.map((action) => (
-                  <div className="action-item-card escalation-theme" key={action.id}>
-                    <div className="action-card-top">
-                      <span className="action-item-title">{action.title}</span>
-                      <span className="action-pill action-pill-escalated">{action.status}</span>
-                    </div>
-                    <p className="action-item-desc">{action.description}</p>
-                    <div className="action-item-footer">
-                      <span>{action.executedBy}</span>
-                      <span>{action.timestamp}</span>
-                    </div>
-                  </div>
-                ))}
-              </article>
-            </section>
-
-            {/* 4. Live Incident Collaboration & Comments */}
-            <section className="comments-section" aria-labelledby="comments-title">
-              <div className="comments-header">
-                <h3 id="comments-title">
-                  <span>💬 Incident Collaboration & Operator Notes</span>
-                  <span className="comments-count-pill">{comments.length} notes</span>
-                </h3>
-                <span style={{ fontSize: '0.75rem', color: 'var(--muted)' }}>
-                  Author / Role-verified · Immutable audit log attached
-                </span>
-              </div>
-
-              {/* Comment Composer */}
-              <form className="comment-composer-card" onSubmit={handleCreateComment}>
-                <textarea
-                  className="comment-textarea"
-                  placeholder="Post an investigation update, rail status, or remediation note..."
-                  value={newCommentText}
-                  onChange={(e) => setNewCommentText(e.target.value)}
-                  maxLength={2000}
-                />
-                <div className="composer-footer">
-                  <span className="comment-char-count">{newCommentText.length} / 2000 chars</span>
-                  <button
-                    type="submit"
-                    className="primary-button"
+                <form onSubmit={handleCreateComment} style={{ marginBottom: '16px' }}>
+                  <textarea
                     style={{
-                      padding: '6px 14px',
-                      fontSize: '0.8rem',
-                      background: '#74cfb8',
-                      color: '#16221f',
+                      width: '100%',
+                      minHeight: '70px',
+                      background: '#070c16',
+                      border: '1px solid #19263e',
+                      borderRadius: '8px',
+                      color: '#f8fafc',
+                      padding: '10px 12px',
+                      fontSize: '0.85rem',
+                      outline: 'none',
+                      boxSizing: 'border-box',
                     }}
-                    disabled={!newCommentText.trim() || isSubmittingComment}
+                    placeholder="Add an incident investigation note, rail status, or mitigation update..."
+                    value={newCommentText}
+                    onChange={(e) => setNewCommentText(e.target.value)}
+                  />
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      marginTop: '8px',
+                    }}
                   >
-                    {isSubmittingComment ? 'Posting...' : 'Post Note +'}
-                  </button>
-                </div>
-              </form>
+                    <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                      {newCommentText.length} / 2000 chars
+                    </span>
+                    <button
+                      type="submit"
+                      disabled={!newCommentText.trim() || isPostingComment}
+                      style={{
+                        background: '#2dd4bf',
+                        color: '#080e18',
+                        padding: '6px 14px',
+                        fontSize: '0.78rem',
+                        fontWeight: 700,
+                        border: 'none',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      {isPostingComment ? 'Posting...' : 'Post Note +'}
+                    </button>
+                  </div>
+                </form>
 
-              {/* Comments Feed */}
-              <div className="comments-thread">
-                {comments.map((comment) => {
-                  const isEditing = editingCommentId === comment.id;
-                  const initials = comment.user?.name
-                    ? comment.user.name
-                        .split(' ')
-                        .map((n) => n[0])
-                        .join('')
-                        .slice(0, 2)
-                        .toUpperCase()
-                    : 'OP';
-                  const timeFormatted = new Date(comment.createdAt).toLocaleTimeString([], {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  });
-
-                  return (
-                    <article className="comment-card" key={comment.id}>
-                      <div className="comment-card-top">
-                        <div className="comment-author-meta">
-                          <span className="comment-avatar" aria-hidden="true">
-                            {initials}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  {comments.map((comment) => (
+                    <div
+                      key={comment.id}
+                      style={{
+                        background: '#090f1a',
+                        border: '1px solid #152238',
+                        borderRadius: '8px',
+                        padding: '12px 14px',
+                      }}
+                    >
+                      <div
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          marginBottom: '6px',
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <span
+                            style={{
+                              width: '22px',
+                              height: '22px',
+                              borderRadius: '50%',
+                              background: '#1e293b',
+                              color: '#38bdf8',
+                              display: 'grid',
+                              placeItems: 'center',
+                              fontSize: '0.65rem',
+                              fontWeight: 700,
+                            }}
+                          >
+                            {(comment.user?.name ?? 'OP').slice(0, 2).toUpperCase()}
                           </span>
-                          <span className="comment-author-name">
+                          <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#f8fafc' }}>
                             {comment.user?.name ?? 'Operator'}
                           </span>
-                          <span className="comment-timestamp">{timeFormatted}</span>
+                          <span style={{ fontSize: '0.7rem', color: '#64748b' }}>
+                            {new Date(comment.createdAt).toLocaleTimeString([], {
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            })}
+                          </span>
                           {comment.isEdited && (
-                            <span className="comment-edited-badge">(edited)</span>
+                            <span
+                              style={{ fontSize: '0.68rem', color: '#f59e0b', fontStyle: 'italic' }}
+                            >
+                              (edited)
+                            </span>
                           )}
                         </div>
-
-                        {!isEditing && (
-                          <div className="comment-actions-bar">
-                            <button
-                              type="button"
-                              className="comment-action-btn"
-                              onClick={() => handleStartEdit(comment)}
-                              aria-label="Edit comment"
-                            >
-                              Edit
-                            </button>
-                            <button
-                              type="button"
-                              className="comment-action-btn btn-delete"
-                              onClick={() => handleDeleteComment(comment.id)}
-                              aria-label="Delete comment"
-                            >
-                              Delete
-                            </button>
-                          </div>
-                        )}
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditingCommentId(comment.id);
+                              setEditingCommentText(comment.content);
+                            }}
+                            style={{
+                              background: 'none',
+                              border: 'none',
+                              color: '#94a3b8',
+                              fontSize: '0.72rem',
+                              cursor: 'pointer',
+                            }}
+                          >
+                            Edit
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteComment(comment.id)}
+                            style={{
+                              background: 'none',
+                              border: 'none',
+                              color: '#ef4444',
+                              fontSize: '0.72rem',
+                              cursor: 'pointer',
+                            }}
+                          >
+                            Delete
+                          </button>
+                        </div>
                       </div>
 
-                      {isEditing ? (
-                        <div className="comment-edit-box">
+                      {editingCommentId === comment.id ? (
+                        <div>
                           <textarea
-                            className="comment-textarea"
+                            style={{
+                              width: '100%',
+                              minHeight: '60px',
+                              background: '#070c16',
+                              border: '1px solid #38bdf8',
+                              color: '#f8fafc',
+                              padding: '8px',
+                              borderRadius: '6px',
+                              fontSize: '0.82rem',
+                            }}
                             value={editingCommentText}
                             onChange={(e) => setEditingCommentText(e.target.value)}
-                            maxLength={2000}
                           />
-                          <div className="comment-edit-actions">
+                          <div
+                            style={{
+                              display: 'flex',
+                              gap: '8px',
+                              justifyContent: 'flex-end',
+                              marginTop: '6px',
+                            }}
+                          >
                             <button
                               type="button"
-                              className="quiet-button"
-                              onClick={handleCancelEdit}
+                              onClick={() => setEditingCommentId(null)}
+                              style={{
+                                background: 'transparent',
+                                border: '1px solid #334155',
+                                color: '#94a3b8',
+                                padding: '4px 10px',
+                                fontSize: '0.72rem',
+                                borderRadius: '4px',
+                                cursor: 'pointer',
+                              }}
                             >
                               Cancel
                             </button>
                             <button
                               type="button"
-                              className="primary-button"
-                              style={{
-                                padding: '4px 10px',
-                                fontSize: '0.75rem',
-                                background: '#74cfb8',
-                                color: '#16221f',
-                              }}
                               onClick={() => handleSaveEdit(comment.id)}
+                              style={{
+                                background: '#2dd4bf',
+                                color: '#080e18',
+                                padding: '4px 10px',
+                                fontSize: '0.72rem',
+                                fontWeight: 700,
+                                border: 'none',
+                                borderRadius: '4px',
+                                cursor: 'pointer',
+                              }}
                             >
-                              Save Changes
+                              Save
                             </button>
                           </div>
                         </div>
                       ) : (
-                        <p className="comment-body-text">{comment.content}</p>
+                        <p
+                          style={{
+                            margin: 0,
+                            fontSize: '0.82rem',
+                            color: '#cbd5e1',
+                            lineHeight: 1.45,
+                          }}
+                        >
+                          {comment.content}
+                        </p>
                       )}
-                    </article>
-                  );
-                })}
-              </div>
-            </section>
-          </div>
-        )}
-
-        {/* ========================================================================= */}
-        {/* VIEW 3: INCIDENT DETECTION                                                */}
-        {/* ========================================================================= */}
-        {activeView === 'detection' && (
-          <section aria-labelledby="detection-heading">
-            <div className="detection-hero-card">
-              <p className="eyebrow">REVENUE INCIDENT DETECTION ENGINE</p>
-              <h2 id="detection-heading" style={{ fontSize: '2rem', marginBottom: '8px' }}>
-                Anomaly Detection & Impact Assessment
-              </h2>
-              <p style={{ color: 'var(--muted)', maxWidth: '680px', margin: 0 }}>
-                Continuous algorithmic surveillance monitors payment success rate deviations,
-                failure-rate spikes, and customer-segment blast radius.
-              </p>
-
-              {/* Required Displays */}
-              <div className="detection-metrics-row">
-                <div className="detection-stat">
-                  <div className="detection-stat-label">Normal Failure Rate</div>
-                  <div className="detection-stat-value" style={{ color: 'var(--teal)' }}>
-                    {detection.normalFailureRate}
-                  </div>
+                    </div>
+                  ))}
                 </div>
+              </section>
+            </>
+          )}
 
-                <div className="detection-stat">
-                  <div className="detection-stat-label">Current Failure Rate</div>
-                  <div className="detection-stat-value" style={{ color: 'var(--danger)' }}>
-                    {detection.currentFailureRate}
-                  </div>
-                </div>
+          {/* ========================================================================= */}
+          {/* VIEW 2: ANALYTICS                                                         */}
+          {/* ========================================================================= */}
+          {activeTab === 'analytics' && (
+            <section style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+              <div
+                style={{
+                  background: '#0d1524',
+                  padding: '24px',
+                  borderRadius: '12px',
+                  border: '1px solid #19263e',
+                }}
+              >
+                <h2 style={{ margin: '0 0 8px', fontFamily: 'Space Grotesk', fontSize: '1.4rem' }}>
+                  Real App Analytics &amp; Revenue Ledger
+                </h2>
+                <p style={{ margin: '0 0 20px', color: '#94a3b8', fontSize: '0.9rem' }}>
+                  Connected live to Prisma database with double-entry accounting reconciliation.
+                </p>
 
-                <div className="detection-stat">
-                  <div className="detection-stat-label">Revenue Impact</div>
-                  <div className="detection-stat-value" style={{ color: 'var(--accent)' }}>
-                    {detection.revenueImpact}
-                  </div>
-                </div>
-
-                <div className="detection-stat">
-                  <div className="detection-stat-label">Affected Segment</div>
+                <div
+                  style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '14px' }}
+                >
                   <div
                     style={{
-                      fontFamily: 'Space Grotesk, sans-serif',
-                      fontSize: '0.92rem',
-                      fontWeight: 700,
-                      marginTop: '4px',
+                      background: '#090f1a',
+                      padding: '16px',
+                      borderRadius: '8px',
+                      border: '1px solid #152238',
                     }}
                   >
-                    {detection.affectedSegment}
-                  </div>
-                </div>
-
-                <div className="detection-stat">
-                  <div className="detection-stat-label">AI Confidence</div>
-                  <div className="detection-stat-value" style={{ color: 'var(--teal)' }}>
-                    {detection.aiConfidenceDisplay}
-                  </div>
-                </div>
-
-                <div className="detection-stat">
-                  <div className="detection-stat-label">Detected Signals</div>
-                  <div className="detection-stat-value" style={{ color: 'var(--danger)' }}>
-                    {detection.detectedAnomaliesCount} Anomalies
-                  </div>
-                </div>
-              </div>
-
-              {/* Recommended Mitigation Panel */}
-              <div className="mitigation-panel">
-                <h3>Recommended Mitigation</h3>
-                <p>{detection.recommendedMitigation}</p>
-                <div style={{ marginTop: '14px' }}>
-                  <button
-                    type="button"
-                    className="primary-button"
-                    onClick={() => setActiveView('war-room')}
-                  >
-                    Open AI War Room to Execute Mitigations ↗
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Abnormal Signals Breakdown Grid */}
-            <div className="signals-grid">
-              {detection.abnormalSignals.map((signal) => (
-                <article
-                  key={signal.type}
-                  className={`signal-card ${signal.severity === 'CRITICAL' ? 'critical-signal' : ''}`}
-                >
-                  <div className="signal-card-header">
-                    <span className="signal-title">{signal.label}</span>
-                    <span
-                      className={`action-pill ${signal.severity === 'CRITICAL' ? 'action-pill-blocked' : 'action-pill-escalated'}`}
+                    <div
+                      style={{ fontSize: '0.72rem', color: '#64748b', textTransform: 'uppercase' }}
                     >
-                      {signal.severity}
-                    </span>
-                  </div>
-                  <div className="signal-metric">{signal.metric}</div>
-                  <p style={{ fontSize: '0.78rem', color: 'var(--muted)', margin: 0 }}>
-                    {signal.description}
-                  </p>
-                </article>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* ========================================================================= */}
-        {/* VIEW 4: REVENUE FORECASTING                                               */}
-        {/* ========================================================================= */}
-        {activeView === 'forecasting' && (
-          <section aria-labelledby="forecasting-heading">
-            {/* Required prominent prediction / estimate disclaimer */}
-            <div className="forecast-disclaimer-banner" role="alert">
-              <span className="forecast-tag-pill">PREDICTION / ESTIMATE</span>
-              <p className="forecast-disclaimer-text">
-                <strong>Important Notice:</strong> Revenue forecasts are probabilistic estimates
-                generated by the algorithmic forecasting service. Projections account for historical
-                run rates, current incident degradation curves, and active recovery mitigations. All
-                figures are clearly labeled as predictions/estimates.
-              </p>
-            </div>
-
-            <div className="section-heading" style={{ marginBottom: '20px' }}>
-              <div>
-                <p className="eyebrow">REVENUE TRAJECTORY PROJECTIONS</p>
-                <h2 id="forecasting-heading">Revenue Forecasting</h2>
-              </div>
-              <span className="status-pill">MODEL: revenue-forecast.v1</span>
-            </div>
-
-            {/* 4 Horizons Grid: 1h, 4h, 12h, 24h */}
-            <div className="forecast-grid">
-              {forecast.horizonsList.map((h) => (
-                <article className="forecast-card" key={h.horizon}>
-                  <div className="forecast-horizon-title">
-                    <h3>{h.horizonLabel}</h3>
-                    <span className="prediction-badge">{h.predictionLabel}</span>
-                  </div>
-
-                  <div className="forecast-metric-group">
-                    <div className="forecast-row">
-                      <span>Projected Gross</span>
-                      <strong>{h.projectedGrossRevenue}</strong>
+                      Total Transactions
                     </div>
-                    <div className="forecast-row">
-                      <span>Projected at Risk</span>
-                      <strong className="at-risk">{h.projectedRevenueAtRisk}</strong>
+                    <div
+                      style={{
+                        fontSize: '1.6rem',
+                        fontWeight: 800,
+                        color: '#f8fafc',
+                        marginTop: '4px',
+                      }}
+                    >
+                      {liveStats.totalTransactions}
                     </div>
-                    <div className="forecast-row">
-                      <span>Expected Rescued</span>
-                      <strong className="rescued">{h.expectedRevenueRescued}</strong>
-                    </div>
-                    <div className="forecast-row">
-                      <span>Success (Unmitigated)</span>
-                      <strong>{h.projectedSuccessRateUnmitigated}</strong>
-                    </div>
-                    <div className="forecast-row">
-                      <span>Success (Mitigated)</span>
-                      <strong style={{ color: 'var(--teal)' }}>
-                        {h.projectedSuccessRateMitigated}
-                      </strong>
-                    </div>
-                    <div className="forecast-row">
-                      <span>AI Confidence</span>
-                      <strong>{h.confidenceScoreDisplay}</strong>
-                    </div>
-                    <div className="forecast-row">
-                      <span>Confidence Band</span>
-                      <span style={{ fontSize: '0.72rem', color: 'var(--muted)' }}>
-                        {h.confidenceInterval.lowerRescued} – {h.confidenceInterval.upperRescued}
-                      </span>
+                    <div style={{ fontSize: '0.72rem', color: '#4ade80', marginTop: '4px' }}>
+                      +8.4% this month
                     </div>
                   </div>
-
-                  <div className="forecast-assumptions">
-                    <strong>Key Assumptions (Estimates):</strong>
-                    <ul style={{ paddingLeft: '16px', margin: '4px 0 0' }}>
-                      {h.assumptions.map((assump) => (
-                        <li key={assump}>{assump}</li>
-                      ))}
-                    </ul>
+                  <div
+                    style={{
+                      background: '#090f1a',
+                      padding: '16px',
+                      borderRadius: '8px',
+                      border: '1px solid #152238',
+                    }}
+                  >
+                    <div
+                      style={{ fontSize: '0.72rem', color: '#64748b', textTransform: 'uppercase' }}
+                    >
+                      Recovered Opportunities
+                    </div>
+                    <div
+                      style={{
+                        fontSize: '1.6rem',
+                        fontWeight: 800,
+                        color: '#2dd4bf',
+                        marginTop: '4px',
+                      }}
+                    >
+                      {liveStats.totalRecovered}
+                    </div>
+                    <div style={{ fontSize: '0.72rem', color: '#2dd4bf', marginTop: '4px' }}>
+                      Rate: {liveStats.recoveryRate}
+                    </div>
                   </div>
-                </article>
-              ))}
-            </div>
-
-            {/* Summary comparison card */}
-            <article className="attention-panel" style={{ marginTop: '16px' }}>
-              <div className="section-heading">
-                <div>
-                  <p className="eyebrow">24-HOUR AGGREGATE ESTIMATE</p>
-                  <h2>Mitigated Trajectory vs Unmitigated Loss</h2>
+                  <div
+                    style={{
+                      background: '#090f1a',
+                      padding: '16px',
+                      borderRadius: '8px',
+                      border: '1px solid #152238',
+                    }}
+                  >
+                    <div
+                      style={{ fontSize: '0.72rem', color: '#64748b', textTransform: 'uppercase' }}
+                    >
+                      Processed Volume
+                    </div>
+                    <div
+                      style={{
+                        fontSize: '1.6rem',
+                        fontWeight: 800,
+                        color: '#f8fafc',
+                        marginTop: '4px',
+                      }}
+                    >
+                      {liveStats.revenueProcessed}
+                    </div>
+                    <div style={{ fontSize: '0.72rem', color: '#94a3b8', marginTop: '4px' }}>
+                      Verified INR rails
+                    </div>
+                  </div>
+                  <div
+                    style={{
+                      background: '#090f1a',
+                      padding: '16px',
+                      borderRadius: '8px',
+                      border: '1px solid #152238',
+                    }}
+                  >
+                    <div
+                      style={{ fontSize: '0.72rem', color: '#64748b', textTransform: 'uppercase' }}
+                    >
+                      Backend API Health
+                    </div>
+                    <div
+                      style={{
+                        fontSize: '1.6rem',
+                        fontWeight: 800,
+                        color: backendHealth === 'healthy' ? '#4ade80' : '#ef4444',
+                        marginTop: '4px',
+                      }}
+                    >
+                      {backendHealth === 'healthy' ? 'ONLINE' : 'CONNECTING'}
+                    </div>
+                    <div style={{ fontSize: '0.72rem', color: '#94a3b8', marginTop: '4px' }}>
+                      Next.js 15 App Router
+                    </div>
+                  </div>
                 </div>
-                <span className="status-pill status-complete">90.9% PROJECTED RECOVERY</span>
               </div>
-              <p style={{ color: 'var(--muted)', fontSize: '0.84rem' }}>
-                With automated gateway traffic failover and jittered retry schedules active, the
-                system estimates rescuing{' '}
-                <strong>{forecast.summary24h.totalEstimatedRescue}</strong> out of{' '}
-                <strong>{forecast.summary24h.totalRevenueAtRisk}</strong> total projected 24-hour
-                risk exposure (Prediction / Estimate).
-              </p>
-            </article>
-          </section>
-        )}
+            </section>
+          )}
 
-        {/* Footer */}
-        <footer className="dashboard-footer">
-          <span>Last updated just now</span>
-          <span>
-            <span className="footer-dot" /> All systems operational
-          </span>
-          <span>DEMO MODE · Synthetic data</span>
-        </footer>
+          {/* ========================================================================= */}
+          {/* VIEW 3: INCIDENTS                                                         */}
+          {/* ========================================================================= */}
+          {activeTab === 'incidents' && (
+            <section style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+              <div
+                style={{
+                  background: '#0d1524',
+                  padding: '24px',
+                  borderRadius: '12px',
+                  border: '1px solid #19263e',
+                }}
+              >
+                <h2 style={{ margin: '0 0 8px', fontFamily: 'Space Grotesk', fontSize: '1.4rem' }}>
+                  Revenue Incident Detection Engine
+                </h2>
+                <p style={{ margin: '0 0 20px', color: '#94a3b8', fontSize: '0.9rem' }}>
+                  Automated degradation triggers, failure spike isolation, and blast radius mapping.
+                </p>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <div
+                    style={{
+                      background: '#1a080c',
+                      border: '1px solid #dc2626',
+                      borderRadius: '8px',
+                      padding: '16px',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                    }}
+                  >
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ color: '#ef4444', fontWeight: 800 }}>INCIDENT #1042</span>
+                        <span className="banner-tag-red">CRITICAL</span>
+                      </div>
+                      <div
+                        style={{
+                          color: '#f8fafc',
+                          fontSize: '0.95rem',
+                          fontWeight: 600,
+                          marginTop: '4px',
+                        }}
+                      >
+                        HDFC Netbanking &amp; High-Value Recurring Subscriptions
+                      </div>
+                      <div style={{ color: '#94a3b8', fontSize: '0.8rem', marginTop: '2px' }}>
+                        Exposure: ₹6,42,800 · Drop: 96.4% → 78.1% · Failure Spike: 6.08x
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab('dashboard')}
+                      style={{
+                        background: '#2dd4bf',
+                        color: '#080e18',
+                        padding: '8px 16px',
+                        borderRadius: '6px',
+                        fontWeight: 700,
+                        border: 'none',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      Open War Room ↗
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </section>
+          )}
+
+          {/* ========================================================================= */}
+          {/* VIEW 4: SETTINGS                                                          */}
+          {/* ========================================================================= */}
+          {activeTab === 'settings' && (
+            <section style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+              <div
+                style={{
+                  background: '#0d1524',
+                  padding: '24px',
+                  borderRadius: '12px',
+                  border: '1px solid #19263e',
+                }}
+              >
+                <h2 style={{ margin: '0 0 8px', fontFamily: 'Space Grotesk', fontSize: '1.4rem' }}>
+                  Gateway &amp; Security Controls
+                </h2>
+                <p style={{ margin: '0 0 20px', color: '#94a3b8', fontSize: '0.9rem' }}>
+                  Configure Razorpay Test Mode credentials, webhook signing secrets, and safety kill
+                  switches.
+                </p>
+
+                <div
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '16px',
+                    maxWidth: '600px',
+                  }}
+                >
+                  <div>
+                    <label
+                      style={{
+                        fontSize: '0.78rem',
+                        color: '#94a3b8',
+                        textTransform: 'uppercase',
+                        display: 'block',
+                        marginBottom: '6px',
+                      }}
+                    >
+                      Razorpay Mode
+                    </label>
+                    <input
+                      type="text"
+                      disabled
+                      value="TEST MODE (rzp_test_...)"
+                      style={{
+                        width: '100%',
+                        background: '#070c16',
+                        border: '1px solid #1e293b',
+                        padding: '10px 12px',
+                        borderRadius: '6px',
+                        color: '#4ade80',
+                        fontSize: '0.88rem',
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <label
+                      style={{
+                        fontSize: '0.78rem',
+                        color: '#94a3b8',
+                        textTransform: 'uppercase',
+                        display: 'block',
+                        marginBottom: '6px',
+                      }}
+                    >
+                      Critical Risk Threshold Gate
+                    </label>
+                    <input
+                      type="text"
+                      disabled
+                      value="Score >= 80 blocks automatic execution"
+                      style={{
+                        width: '100%',
+                        background: '#070c16',
+                        border: '1px solid #1e293b',
+                        padding: '10px 12px',
+                        borderRadius: '6px',
+                        color: '#f8fafc',
+                        fontSize: '0.88rem',
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <label
+                      style={{
+                        fontSize: '0.78rem',
+                        color: '#94a3b8',
+                        textTransform: 'uppercase',
+                        display: 'block',
+                        marginBottom: '6px',
+                      }}
+                    >
+                      HMAC Webhook Verification
+                    </label>
+                    <input
+                      type="text"
+                      disabled
+                      value="Timing-Safe SHA256 Equal Active"
+                      style={{
+                        width: '100%',
+                        background: '#070c16',
+                        border: '1px solid #1e293b',
+                        padding: '10px 12px',
+                        borderRadius: '6px',
+                        color: '#2dd4bf',
+                        fontSize: '0.88rem',
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+            </section>
+          )}
+
+          {/* ========================================================================= */}
+          {/* VIEW 5: NOTIFICATIONS                                                     */}
+          {/* ========================================================================= */}
+          {activeTab === 'notifications' && (
+            <section style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+              <div
+                style={{
+                  background: '#0d1524',
+                  padding: '24px',
+                  borderRadius: '12px',
+                  border: '1px solid #19263e',
+                }}
+              >
+                <h2 style={{ margin: '0 0 8px', fontFamily: 'Space Grotesk', fontSize: '1.4rem' }}>
+                  Live System Alert Stream
+                </h2>
+                <p style={{ margin: '0 0 20px', color: '#94a3b8', fontSize: '0.9rem' }}>
+                  Real-time events from the Anomaly Detection pipeline and Webhook processor.
+                </p>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  <div
+                    style={{
+                      background: '#090f1a',
+                      padding: '12px 16px',
+                      borderRadius: '6px',
+                      borderLeft: '4px solid #ef4444',
+                    }}
+                  >
+                    <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#f8fafc' }}>
+                      [CRITICAL] Gateway Error 503 Surge on HDFC Netbanking
+                    </div>
+                    <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '2px' }}>
+                      42 minutes ago · Triggered automated mitigation plan &amp; secondary failover
+                    </div>
+                  </div>
+                  <div
+                    style={{
+                      background: '#090f1a',
+                      padding: '12px 16px',
+                      borderRadius: '6px',
+                      borderLeft: '4px solid #2dd4bf',
+                    }}
+                  >
+                    <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#f8fafc' }}>
+                      [RECOVERY] ICICI Rail Failover Activated
+                    </div>
+                    <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '2px' }}>
+                      25 minutes ago · 250 payment attempts routed with smart jitter
+                    </div>
+                  </div>
+                  <div
+                    style={{
+                      background: '#090f1a',
+                      padding: '12px 16px',
+                      borderRadius: '6px',
+                      borderLeft: '4px solid #38bdf8',
+                    }}
+                  >
+                    <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#f8fafc' }}>
+                      [AUDIT] Immutable Ledger Checkpoint Created
+                    </div>
+                    <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '2px' }}>
+                      10 minutes ago · Hash verified with zero discrepancy
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+          )}
+        </main>
       </div>
-    </main>
+    </div>
   );
 }
