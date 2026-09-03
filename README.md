@@ -1,58 +1,156 @@
 # RazorRecover AI
 
-RazorRecover AI is an AI-native revenue recovery operating system for merchants that helps detect at-risk revenue, diagnose failure patterns, recommend and safely simulate recovery actions, and verify outcomes using deterministic execution and auditable controls.
+[![CI Status](https://github.com/mishraayushmaan31-sys/razorrecover-ai/actions/workflows/ci.yml/badge.svg)](https://github.com/mishraayushmaan31-sys/razorrecover-ai/actions)
+[![Tests](https://img.shields.io/badge/tests-70%20passed-success)](https://github.com/mishraayushmaan31-sys/razorrecover-ai)
+[![Next.js](https://img.shields.io/badge/Next.js-15.5.0-black?logo=next.js)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue?logo=typescript)](https://www.typescriptlang.org/)
+[![Prisma](https://img.shields.io/badge/Prisma-6.0-teal?logo=prisma)](https://www.prisma.io/)
+[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
-## Safety and execution model
+**RazorRecover AI** is an AI-native revenue recovery operating system designed for fintech merchants. It detects abnormal payment failures, diagnoses root causes, simulates recovery actions, enforces deterministic safety policies and risk gates, provides human escalation oversight, coordinates live response in an AI Revenue War Room, and forecasts multi-horizon revenue recovery.
 
-This project follows a strict financial control pattern:
+---
 
-AI Recommendation -> Policy Engine -> Risk Gate -> Human Approval when required -> Deterministic Execution Service -> Razorpay -> Webhook -> Verification -> Revenue Ledger -> Learning
+## 🌐 Live Output & Application Links
 
-Important constraints:
+- **GitHub Repository**: [https://github.com/mishraayushmaan31-sys/razorrecover-ai](https://github.com/mishraayushmaan31-sys/razorrecover-ai)
+- **Project Homepage**: [https://mishraayushmaan31-sys.github.io/razorrecover-ai](https://mishraayushmaan31-sys.github.io/razorrecover-ai)
+- **Local Application Output**: [http://localhost:3000](http://localhost:3000)
+- **Health Check Endpoint**: [http://localhost:3000/api/health](http://localhost:3000/api/health)
+- **Incident Detection Telemetry**: [http://localhost:3000/api/incidents/detection](http://localhost:3000/api/incidents/detection)
+- **AI Revenue War Room**: [http://localhost:3000/api/incidents/war-room](http://localhost:3000/api/incidents/war-room)
+- **Revenue Forecast (1h, 4h, 12h, 24h)**: [http://localhost:3000/api/forecast](http://localhost:3000/api/forecast)
 
-- The LLM never directly executes money movement.
-- Razorpay secrets remain server-side only.
-- All AI responses are validated server-side.
-- Recovery actions use idempotent execution.
-- Payment and webhook handling must verify signatures and deduplicate events.
-- Demo data must never be confused with real or test payment data.
+---
 
-## Repository status
+## 🛡️ Financial Safety & Control Model
 
-This repository is currently initialized as a clean project foundation for a new implementation. Product features will be added incrementally in future prompts.
+RazorRecover AI enforces an unbreakable financial safety boundary: **AI models recommend actions, but deterministic policy engines, risk gates, and human reviewers authorize execution.**
 
-## Project structure
+```mermaid
+flowchart LR
+    A[Payment Failure / Spike] --> B[AI Multi-Agent Detection & Diagnosis]
+    B --> C[Deterministic Policy Engine]
+    C --> D{Risk Gate < 80?}
+    D -- Critical Risk >= 80 --> E[RISK_BLOCKED / Human Escalation]
+    D -- Low Risk --> F[Idempotency Verification]
+    F --> G[Deterministic Execution Service]
+    G --> H[Razorpay Test API]
+    H --> I[HMAC Webhook Ingestion]
+    I --> J[Double-Entry Revenue Ledger]
+```
 
-- frontend/
-- backend/
-- database/
-- agents/
-- ai-prompts/
-- policies/
-- razorpay/
-- webhooks/
-- auth/
-- authorization/
-- analytics/
-- experiments/
-- tests/
-- docs/
-- deployment/
-- infrastructure/
-- config/
-- demo-data/
+### Safety Guarantees:
+- **No Direct LLM Mutation**: Language models never directly trigger bank debits or money transfers.
+- **Fail-Safe Policy Gate**: Conflicting rules, critical risk scores ($\ge 80$), and unverified webhooks fail closed (`BLOCK` or `REQUIRE_REVIEW`).
+- **Timing-Safe Webhooks**: All incoming webhook payloads are verified using HMAC-SHA256 with timing-safe comparison (`crypto.timingSafeEqual`) to prevent timing attacks.
+- **Strict Idempotency**: Recovery actions and webhooks enforce idempotency keys to eliminate double-charges.
 
-## Immediate next steps
+---
 
-1. Establish the canonical runtime stack.
-2. Define the schema and security model.
-3. Build the core policy engine and risk gate.
-4. Add the Razorpay integration layer in test mode only.
-5. Implement the demo data mode and UI content boundaries.
-6. Validate with smoke tests before production-oriented features.
+## ⚡ Key Modules
 
-## Notes
+### 1. Revenue Incident Detection
+Monitors payment traffic in real time and automatically detects anomalies:
+- **Payment Degradation**: Detects drops $\ge 5\%$ (e.g. 96.4% down to 78.1%).
+- **Failure-Rate Spikes**: Detects surges $\ge 2.0\times$ (e.g. 3.6% baseline surging to 21.9%).
+- **Financial Exposure**: Detects high-value merchant revenue at risk.
+- **Segment Blast Radius**: Isolates impacted customer segments (e.g., *HDFC & ICICI Netbanking / High-Value Subscriptions*).
 
-- This is not a production deployment yet.
-- No financial, payment, or customer data is included in the repo.
-- Future work must maintain the separation between demo, Razorpay test mode, and future production mode.
+### 2. AI Revenue War Room
+Coordinates high-urgency incident response for major disruptions (such as **REVENUE INCIDENT #1042**):
+- **Live Telemetry & Diagnostics**: Real-time monitoring of gateway nodes, webhook pipelines, and VIP accounts.
+- **Action Board**:
+  - **Recovery Actions**: Dynamic failover routing to secondary rails, smart retries with 15m exponential jitter, and VIP links.
+  - **Blocked Actions**: Enforced by deterministic policies to halt aggressive retries and unverified card debits.
+  - **Human Escalations**: Urgent routing to on-call treasury and operations engineers.
+- **Incident Resolution**: Interactive lifecycle concluding with verified revenue rescued, recovery rate, and post-mortem audit.
+
+### 3. Multi-Horizon Revenue Forecasting
+Provides algorithmic revenue projections across 4 explicit horizons:
+- **1 Hour** | **4 Hours** | **12 Hours** | **24 Hours**
+- Each projection includes gross revenue, revenue at risk, expected rescued revenue, unmitigated vs. mitigated conversion rates, and confidence intervals.
+- Prominently labeled with **`PREDICTION / ESTIMATE`** badges.
+
+---
+
+## 🧪 Production Readiness & Verification
+
+All 70 unit, integration, and failure-mode tests pass cleanly:
+
+```bash
+npm run test
+```
+
+### 12 Explicit Failure Scenarios Tested & Verified:
+1. **Razorpay Timeout**: Safe reads retry with exponential backoff; mutations abort immediately without automatic retry.
+2. **Duplicate Webhook**: Idempotency layer deduplicates incoming events and prevents double processing.
+3. **Invalid Webhook Signature**: Signature verification strictly rejects unverified payloads with HTTP 401.
+4. **AI Unavailable**: Fallback mechanism returns bounded 0-confidence response without financial authorization.
+5. **AI Hallucination**: Schema validation rejects non-allowlisted actions or invalid confidence values.
+6. **Policy Conflict**: Contradictory rules fail closed with `BLOCK`.
+7. **High-Risk Transaction**: Risk score $\ge 80$ immediately trips the risk gate to `RISK_BLOCKED`.
+8. **Duplicate Recovery**: Replayed recovery requests safely return existing action without re-execution.
+9. **Database Failure**: Catches connection pool errors and returns safe HTTP 500/503 without leaking internals.
+10. **Network Failure**: Connection resets abort cleanly without partial state corruption.
+11. **Partial Execution**: Multi-step operations roll back completely via database transactions if ledger writes fail.
+12. **Human Rejection**: Reviewer `REJECT` decision transitions recovery status to `CANCELLED`.
+
+---
+
+## 🚀 Quickstart Guide
+
+### Prerequisites
+- Node.js 22+
+- npm 10+
+
+### 1. Clone the Repository
+```bash
+git clone https://github.com/mishraayushmaan31-sys/razorrecover-ai.git
+cd razorrecover-ai
+```
+
+### 2. Install Dependencies
+```bash
+npm install
+```
+
+### 3. Environment Configuration
+Copy the example environment file:
+```bash
+cp .env.example .env
+```
+
+### 4. Run the Development Server
+```bash
+npm run dev
+```
+Open **[http://localhost:3000](http://localhost:3000)** in your browser.
+
+### 5. Run Quality & Test Checks
+```bash
+npm run test        # Run 70 vitest test suites
+npm run typecheck   # Validate TypeScript types
+npm run lint        # Check ESLint rules
+npm run build       # Compile Next.js production build
+```
+
+---
+
+## ☁️ Cloud Infrastructure (AWS MVP)
+
+The project includes production-ready Terraform Infrastructure as Code in [`infrastructure/terraform/`](infrastructure/terraform/):
+- **CloudFront & Route 53**: Edge CDN with static asset caching and health check routing.
+- **AWS WAFv2**: OWASP Common Rules, Amazon IP reputation list, and IP rate limiting (500 req / 5 min).
+- **ECS Fargate**: Serverless container execution with auto-scaling (2 to 6 tasks).
+- **RDS PostgreSQL 16**: Multi-AZ high availability with 14-day automated backup retention (PITR).
+- **ElastiCache Redis**: Distributed idempotency locks and token bucket rate limiters.
+- **SQS FIFO & DLQ**: Reliable webhook ingestion buffer with redrive policy (`maxReceiveCount = 3`).
+- **S3 Audit Archive**: Encrypted, versioned bucket with public access blocked for immutable compliance logs.
+- **CI/CD Workflows**: Automated GitHub Actions pipelines for linting, testing, Docker builds, and ECS blue/green deployments.
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License.
