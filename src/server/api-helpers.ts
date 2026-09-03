@@ -26,6 +26,13 @@ export async function protect(request: NextRequest, permission: Permission) {
   const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown';
   const key = `${permission}:${ip}`;
   const now = Date.now();
+  if (buckets.size > 200) {
+    for (const [k, v] of buckets.entries()) {
+      if (v.resetAt <= now) {
+        buckets.delete(k);
+      }
+    }
+  }
   const bucket = buckets.get(key);
 
   if (!bucket || bucket.resetAt <= now) {
