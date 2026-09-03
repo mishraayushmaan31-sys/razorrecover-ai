@@ -1,0 +1,46 @@
+{
+  "name": "razorrecover-ai",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx,css}\" \"auth/**/*.ts\" \"authorization/**/*.ts\" \"database/**/*.ts\" \"tests/**/*.ts\" \"razorpay/**/*.ts\" \"webhooks/**/*.ts\" \"risk-engine/**/*.ts\" \"recovery-engine/**/*.ts\" \"agents/**/*.ts\" \"ai-prompts/**/*.ts\" \"policies/**/*.ts\" \"human-review/**/*.ts\" \"prisma/seed.ts\" \"package.json\" \"tsconfig.json\" \"next.config.ts\" \"eslint.config.mjs\" \"docker-compose.yml\" \"next-env.d.ts\" \"vitest.config.ts\" \".prettierrc.json\"",
+    "typecheck": "tsc --noEmit",
+    "db:generate": "prisma generate",
+    "db:format": "prisma format",
+    "db:validate": "prisma validate",
+    "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
+    "db:seed": "tsx prisma/seed.ts",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.0.0",
+    "bcryptjs": "^2.4.3",
+    "jose": "^6.0.11",
+    "next": "^15.5.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/react": "^19.0.6",
+    "@types/react-dom": "^19.0.2",
+    "eslint": "^9.17.0",
+    "eslint-config-next": "^15.5.0",
+    "prettier": "^3.4.2",
+    "prisma": "^6.0.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "typescript-eslint": "^8.18.0",
+    "vitest": "^2.1.8"
+  }
+}

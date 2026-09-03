@@ -1,0 +1,914 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum AppMode {
+  DEMO
+  TEST
+  PRODUCTION
+}
+
+enum RoleType {
+  OWNER
+  FINANCE_MANAGER
+  OPERATIONS_MANAGER
+  DEVELOPER
+  VIEWER
+  MERCHANT_OWNER
+  MERCHANT_ADMIN
+  MERCHANT_OPERATOR
+  MERCHANT_SUPPORT
+  FINANCE_ANALYST
+  AUDITOR
+  SYSTEM_ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  INVITED
+  INACTIVE
+  SUSPENDED
+}
+
+enum CustomerStatus {
+  ACTIVE
+  INACTIVE
+  ARCHIVED
+}
+
+enum TransactionType {
+  PAYMENT
+  REFUND
+  REVERSAL
+  ADJUSTMENT
+  CHARGEBACK
+}
+
+enum TransactionStatus {
+  PENDING
+  PROCESSING
+  SUCCEEDED
+  FAILED
+  REFUNDED
+  REVERSED
+  DISPUTED
+}
+
+enum PaymentStatus {
+  PENDING
+  AUTHORIZED
+  CAPTURED
+  FAILED
+  REFUNDED
+  PARTIALLY_REFUNDED
+}
+
+enum OrderStatus {
+  CREATED
+  CONFIRMED
+  PAID
+  FAILED
+  CANCELLED
+  REFUNDED
+}
+
+enum PaymentAttemptStatus {
+  INITIATED
+  PENDING
+  AUTHORIZED
+  CAPTURED
+  FAILED
+  REJECTED
+  EXPIRED
+}
+
+enum RecoveryOpportunityStatus {
+  IDENTIFIED
+  EVALUATING
+  APPROVED
+  REJECTED
+  RECOVERED
+  CLOSED
+}
+
+enum RecoveryStrategyStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  ARCHIVED
+}
+
+enum RecoveryActionStatus {
+  RECOMMENDED
+  POLICY_BLOCKED
+  RISK_BLOCKED
+  NEEDS_APPROVAL
+  APPROVED
+  EXECUTING
+  COMPLETED
+  CANCELLED
+  QUEUED
+  IN_PROGRESS
+  SUCCEEDED
+  FAILED
+  REQUIRES_REVIEW
+  BLOCKED
+}
+
+enum ExperimentStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  COMPLETED
+  ARCHIVED
+}
+
+enum VariantStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum IncidentStatus {
+  OPEN
+  INVESTIGATING
+  RESOLVED
+  CLOSED
+}
+
+enum RiskLevel {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum RiskSource {
+  PAYMENT_GATEWAY
+  AI_MODEL
+  MANUAL_REVIEW
+  POLICY_ENGINE
+}
+
+enum AIRecommendationType {
+  RISK_SUMMARY
+  RECOVERY_STRATEGY
+  PAYMENT_RETRY
+  NEXT_BEST_ACTION
+}
+
+enum RecommendationStatus {
+  PROPOSED
+  ACCEPTED
+  REJECTED
+  EXPIRED
+}
+
+enum PolicyScope {
+  MERCHANT
+  GLOBAL
+}
+
+enum PolicyType {
+  RISK_THRESHOLD
+  RECOVERY_ACTION
+  APPROVAL_REQUIREMENT
+  APPROVAL_EXEMPTION
+}
+
+enum PolicyDecision {
+  ALLOW
+  DENY
+  REQUIRE_REVIEW
+  BLOCK
+}
+
+enum ReviewStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  ESCALATED
+}
+
+enum HumanReviewAction {
+  APPROVE
+  REJECT
+  MODIFY
+  ASSIGN
+  ESCALATE
+}
+
+enum AuditAction {
+  SIGNUP
+  LOGIN
+  LOGOUT
+  LOGIN_FAILED
+  PASSWORD_CHANGED
+  ACCOUNT_LOCKED
+  CREATE
+  UPDATE
+  DELETE
+  APPROVE
+  REJECT
+  EXECUTE
+  SYNC
+  REVIEW
+}
+
+enum LedgerEntryType {
+  REVENUE_RECOVERED
+  REFUND
+  REVERSAL
+  COMMISSION
+  FEE_ADJUSTMENT
+  TAX
+}
+
+enum LedgerDirection {
+  CREDIT
+  DEBIT
+}
+
+enum NotificationType {
+  RISK_ALERT
+  APPROVAL_REQUIRED
+  RECOVERY_SUCCESS
+  PAYMENT_FAILURE
+  SYSTEM
+}
+
+enum NotificationStatus {
+  QUEUED
+  SENT
+  DELIVERED
+  FAILED
+  READ
+}
+
+model Merchant {
+  id        String    @id @default(uuid())
+  name      String
+  slug      String    @unique
+  mode      AppMode   @default(DEMO)
+  status    String    @default("active")
+  aiKillSwitchActive Boolean @default(false)
+  aiKillSwitchActivatedAt DateTime?
+  aiKillSwitchActivatedBy String?
+  currency  String    @default("INR")
+  timezone  String    @default("Asia/Kolkata")
+  metadata  Json?
+  isDeleted Boolean   @default(false)
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  users             User[]
+  roles             Role[]
+  customers         Customer[]
+  transactions      Transaction[]
+  payments          Payment[]
+  orders            Order[]
+  paymentAttempts   PaymentAttempt[]
+  opportunities     RecoveryOpportunity[]
+  strategies        RecoveryStrategy[]
+  actions           RecoveryAction[]
+  experiments       RecoveryExperiment[]
+  variants          ExperimentVariant[]
+  incidents         Incident[]
+  riskAssessments   RiskAssessment[]
+  recommendations   AIRecommendation[]
+  policies          Policy[]
+  policyEvaluations PolicyEvaluation[]
+  reviews           HumanReview[]
+  auditLogs         AuditLog[]
+  webhookEvents     WebhookEvent[]
+  revenueLedger     RevenueLedger[]
+  memories          MerchantMemory[]
+  notifications     Notification[]
+  explainabilityLedgers ExplainabilityLedger[]
+
+  @@index([slug, mode])
+  @@index([status, createdAt])
+}
+
+model Role {
+  id          String    @id @default(uuid())
+  merchantId  String?
+  name        String
+  type        RoleType
+  description String?
+  isDeleted   Boolean   @default(false)
+  deletedAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  merchant Merchant? @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  users    User[]
+
+  @@unique([merchantId, name])
+  @@index([merchantId, type])
+}
+
+model User {
+  id                  String     @id @default(uuid())
+  merchantId          String
+  roleId              String
+  email               String
+  name                String
+  passwordHash        String
+  failedLoginAttempts Int        @default(0)
+  lockedUntil         DateTime?
+  avatarUrl           String?
+  status              UserStatus @default(ACTIVE)
+  lastLoginAt         DateTime?
+  metadata            Json?
+  isDeleted           Boolean    @default(false)
+  deletedAt           DateTime?
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
+
+  merchant        Merchant             @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  role            Role                 @relation(fields: [roleId], references: [id], onDelete: Restrict)
+  reviews         HumanReview[]
+  assignedReviews HumanReview[] @relation("HumanReviewAssignee")
+  auditLogs       AuditLog[]
+  notifications   Notification[]
+  recommendations AIRecommendation[]
+  actions         RecoveryAction[]
+  experiments     RecoveryExperiment[]
+
+  @@unique([merchantId, email])
+  @@index([merchantId, status])
+  @@index([email])
+}
+
+model Customer {
+  id         String         @id @default(uuid())
+  merchantId String
+  externalId String?
+  name       String
+  email      String?
+  phone      String?
+  status     CustomerStatus @default(ACTIVE)
+  riskScore  Decimal?       @db.Decimal(5, 2)
+  metadata   Json?
+  isDeleted  Boolean        @default(false)
+  deletedAt  DateTime?
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+
+  merchant        Merchant              @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  transactions    Transaction[]
+  orders          Order[]
+  payments        Payment[]
+  opportunities   RecoveryOpportunity[]
+  incidents       Incident[]
+  riskAssessments RiskAssessment[]
+  explainabilityLedgers ExplainabilityLedger[]
+
+  @@unique([merchantId, externalId])
+  @@index([merchantId, status])
+  @@index([merchantId, email])
+}
+
+model Transaction {
+  id             String            @id @default(uuid())
+  merchantId     String
+  customerId     String
+  orderId        String?
+  externalId     String?
+  type           TransactionType
+  status         TransactionStatus
+  amount         Decimal           @db.Decimal(18, 2)
+  currency       String            @default("INR")
+  description    String?
+  idempotencyKey String?
+  metadata       Json?
+  isDeleted      Boolean           @default(false)
+  deletedAt      DateTime?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  merchant        Merchant              @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  customer        Customer              @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  order           Order?                @relation("OrderTransactions", fields: [orderId], references: [id], onDelete: SetNull)
+  payments        Payment[]
+  recoveries      RecoveryOpportunity[]
+  riskAssessments RiskAssessment[]
+  revenueLedger   RevenueLedger[]
+  explainabilityLedgers ExplainabilityLedger[]
+
+  @@unique([merchantId, idempotencyKey])
+  @@index([merchantId, status, createdAt])
+  @@index([merchantId, customerId, createdAt])
+}
+
+model Payment {
+  id                String        @id @default(uuid())
+  merchantId        String
+  customerId        String?
+  orderId           String?
+  transactionId     String?
+  paymentMethod     String?
+  provider          String?
+  providerPaymentId String?
+  status            PaymentStatus @default(PENDING)
+  amount            Decimal       @db.Decimal(18, 2)
+  currency          String        @default("INR")
+  riskScore         Decimal?      @db.Decimal(5, 2)
+  gatewayData       Json?
+  idempotencyKey    String?
+  metadata          Json?
+  isDeleted         Boolean       @default(false)
+  deletedAt         DateTime?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  merchant        Merchant              @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  customer        Customer?             @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  order           Order?                @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  transaction     Transaction?          @relation(fields: [transactionId], references: [id], onDelete: SetNull)
+  attempts        PaymentAttempt[]
+  opportunities   RecoveryOpportunity[]
+  riskAssessments RiskAssessment[]
+  revenueLedger   RevenueLedger[]
+
+  @@unique([merchantId, idempotencyKey])
+  @@unique([merchantId, provider, providerPaymentId])
+  @@index([merchantId, status, createdAt])
+  @@index([provider, providerPaymentId])
+}
+
+model Order {
+  id             String      @id @default(uuid())
+  merchantId     String
+  customerId     String
+  orderNumber    String
+  status         OrderStatus @default(CREATED)
+  amount         Decimal     @db.Decimal(18, 2)
+  currency       String      @default("INR")
+  items          Json?
+  idempotencyKey String?
+  metadata       Json?
+  isDeleted      Boolean     @default(false)
+  deletedAt      DateTime?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  merchant        Merchant              @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  customer        Customer              @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  payments        Payment[]
+  paymentAttempts PaymentAttempt[]
+  opportunities   RecoveryOpportunity[]
+  transactions    Transaction[]         @relation("OrderTransactions")
+
+  @@unique([merchantId, orderNumber])
+  @@index([merchantId, status, createdAt])
+}
+
+model PaymentAttempt {
+  id                  String               @id @default(uuid())
+  merchantId          String
+  orderId             String?
+  paymentId           String?
+  attemptNumber       Int
+  status              PaymentAttemptStatus
+  amount              Decimal              @db.Decimal(18, 2)
+  currency            String               @default("INR")
+  provider            String
+  providerAttemptId   String?
+  gatewayResponseCode String?
+  idempotencyKey      String
+  metadata            Json?
+  isDeleted           Boolean              @default(false)
+  deletedAt           DateTime?
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+
+  merchant Merchant @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  order    Order?   @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  payment  Payment? @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+
+  @@unique([merchantId, idempotencyKey])
+  @@unique([merchantId, orderId, attemptNumber])
+  @@index([merchantId, status, createdAt])
+}
+
+model RecoveryOpportunity {
+  id                String                    @id @default(uuid())
+  merchantId        String
+  customerId        String
+  transactionId     String?
+  paymentId         String?
+  orderId           String?
+  incidentId        String?
+  status            RecoveryOpportunityStatus @default(IDENTIFIED)
+  estimatedAmount   Decimal?                  @db.Decimal(18, 2)
+  recommendedAmount Decimal?                  @db.Decimal(18, 2)
+  reason            String?
+  riskScore         Decimal?                  @db.Decimal(5, 2)
+  aiScore           Decimal?                  @db.Decimal(5, 2)
+  idempotencyKey    String?
+  metadata          Json?
+  isDeleted         Boolean                   @default(false)
+  deletedAt         DateTime?
+  createdAt         DateTime                  @default(now())
+  updatedAt         DateTime                  @updatedAt
+
+  merchant        Merchant           @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  customer        Customer           @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  transaction     Transaction?       @relation(fields: [transactionId], references: [id], onDelete: SetNull)
+  payment         Payment?           @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+  order           Order?             @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  incident        Incident?          @relation(fields: [incidentId], references: [id], onDelete: SetNull)
+  strategies      RecoveryStrategy[]
+  actions         RecoveryAction[]
+  recommendations AIRecommendation[]
+  revenueLedger   RevenueLedger[]
+
+  @@unique([merchantId, idempotencyKey])
+  @@index([merchantId, status, createdAt])
+}
+
+model RecoveryStrategy {
+  id                String                 @id @default(uuid())
+  merchantId        String
+  opportunityId     String
+  name              String
+  type              String?
+  status            RecoveryStrategyStatus @default(DRAFT)
+  rationale         String?
+  estimatedRecovery Decimal?               @db.Decimal(18, 2)
+  approvalRequired  Boolean                @default(false)
+  metadata          Json?
+  isDeleted         Boolean                @default(false)
+  deletedAt         DateTime?
+  createdAt         DateTime               @default(now())
+  updatedAt         DateTime               @updatedAt
+
+  merchant    Merchant            @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  opportunity RecoveryOpportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  actions     RecoveryAction[]
+
+  @@unique([merchantId, opportunityId, name])
+  @@index([merchantId, status, createdAt])
+}
+
+model RecoveryAction {
+  id              String               @id @default(uuid())
+  merchantId      String
+  opportunityId   String
+  strategyId      String?
+  userId          String?
+  type            String
+  status          RecoveryActionStatus @default(QUEUED)
+  requestedAmount Decimal?             @db.Decimal(18, 2)
+  executedAmount  Decimal?             @db.Decimal(18, 2)
+  idempotencyKey  String?
+  reason          String?
+  metadata        Json?
+  isDeleted       Boolean              @default(false)
+  deletedAt       DateTime?
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+
+  merchant    Merchant            @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  opportunity RecoveryOpportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  strategy    RecoveryStrategy?   @relation(fields: [strategyId], references: [id], onDelete: SetNull)
+  user        User?               @relation(fields: [userId], references: [id], onDelete: SetNull)
+  explainability ExplainabilityLedger[]
+
+  @@unique([merchantId, idempotencyKey])
+  @@index([merchantId, status, createdAt])
+}
+
+model RecoveryExperiment {
+  id              String           @id @default(uuid())
+  merchantId      String
+  createdByUserId String?
+  name            String
+  description     String?
+  status          ExperimentStatus @default(DRAFT)
+  metadata        Json?
+  isDeleted       Boolean          @default(false)
+  deletedAt       DateTime?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  merchant Merchant            @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  user     User?               @relation(fields: [createdByUserId], references: [id], onDelete: SetNull)
+  variants ExperimentVariant[]
+
+  @@unique([merchantId, name])
+  @@index([merchantId, status, createdAt])
+}
+
+model ExperimentVariant {
+  id           String        @id @default(uuid())
+  merchantId   String
+  experimentId String
+  name         String
+  allocation   Decimal       @db.Decimal(5, 2)
+  status       VariantStatus @default(ACTIVE)
+  description  String?
+  metadata     Json?
+  isDeleted    Boolean       @default(false)
+  deletedAt    DateTime?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  merchant   Merchant           @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  experiment RecoveryExperiment @relation(fields: [experimentId], references: [id], onDelete: Cascade)
+
+  @@unique([experimentId, name])
+  @@index([experimentId, status])
+}
+
+model Incident {
+  id            String         @id @default(uuid())
+  merchantId    String
+  customerId    String?
+  transactionId String?
+  title         String
+  description   String
+  status        IncidentStatus @default(OPEN)
+  severity      RiskLevel
+  source        String?
+  metadata      Json?
+  isDeleted     Boolean        @default(false)
+  deletedAt     DateTime?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  merchant      Merchant              @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  customer      Customer?             @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  opportunities RecoveryOpportunity[]
+
+  @@index([merchantId, status, createdAt])
+}
+
+model RiskAssessment {
+  id            String     @id @default(uuid())
+  merchantId    String
+  customerId    String?
+  paymentId     String?
+  transactionId String?
+  score         Decimal    @db.Decimal(5, 2)
+  level         RiskLevel
+  source        RiskSource
+  summary       String
+  details       Json?
+  isApproved    Boolean    @default(false)
+  isDeleted     Boolean    @default(false)
+  deletedAt     DateTime?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  merchant    Merchant     @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  customer    Customer?    @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  payment     Payment?     @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+  transaction Transaction? @relation(fields: [transactionId], references: [id], onDelete: SetNull)
+
+  @@index([merchantId, level, createdAt])
+  @@index([merchantId, paymentId, createdAt])
+}
+
+model AIRecommendation {
+  id              String               @id @default(uuid())
+  merchantId      String
+  opportunityId   String?
+  createdByUserId String?
+  type            AIRecommendationType
+  status          RecommendationStatus @default(PROPOSED)
+  confidence      Decimal              @db.Decimal(5, 2)
+  summary         String
+  details         Json?
+  modelName       String?
+  promptHash      String?
+  responseHash    String?
+  metadata        Json?
+  isDeleted       Boolean              @default(false)
+  deletedAt       DateTime?
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+
+  merchant    Merchant             @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  opportunity RecoveryOpportunity? @relation(fields: [opportunityId], references: [id], onDelete: SetNull)
+  user        User?                @relation(fields: [createdByUserId], references: [id], onDelete: SetNull)
+
+  @@index([merchantId, status, createdAt])
+}
+
+model Policy {
+  id              String      @id @default(uuid())
+  merchantId      String
+  name            String
+  type            PolicyType
+  scope           PolicyScope @default(MERCHANT)
+  version         Int         @default(1)
+  rules           Json
+  summary         String?
+  isActive        Boolean     @default(true)
+  createdByUserId String?
+  validFrom       DateTime    @default(now())
+  validTo         DateTime?
+  isDeleted       Boolean     @default(false)
+  deletedAt       DateTime?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  merchant    Merchant           @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  evaluations PolicyEvaluation[]
+
+  @@unique([merchantId, name, version])
+  @@index([merchantId, isActive, type])
+}
+
+model PolicyEvaluation {
+  id           String         @id @default(uuid())
+  merchantId   String
+  policyId     String
+  resourceType String
+  resourceId   String
+  decision     PolicyDecision
+  rationale    String
+  score        Decimal?       @db.Decimal(5, 2)
+  evaluatedBy  String?
+  metadata     Json?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  merchant Merchant @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  policy   Policy   @relation(fields: [policyId], references: [id], onDelete: Restrict)
+
+  @@index([merchantId, policyId, createdAt])
+  @@index([resourceType, resourceId])
+}
+
+model HumanReview {
+  id             String       @id @default(uuid())
+  merchantId     String
+  resourceType   String
+  resourceId     String
+  reviewerUserId String
+  assignedToUserId String?
+  action         HumanReviewAction?
+  status         ReviewStatus @default(PENDING)
+  decision       String?
+  reason         String?
+  modifiedProposal Json?
+  reviewedAt     DateTime?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  merchant Merchant @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  reviewer User     @relation(fields: [reviewerUserId], references: [id], onDelete: Restrict)
+  assignedTo User?  @relation("HumanReviewAssignee", fields: [assignedToUserId], references: [id], onDelete: SetNull)
+  explainability ExplainabilityLedger[]
+
+  @@index([merchantId, status, createdAt])
+  @@index([resourceType, resourceId])
+}
+
+model ExplainabilityLedger {
+  id              String   @id @default(uuid())
+  merchantId      String
+  actionId        String
+  reviewId        String
+  transactionId   String?
+  customerId      String?
+  agent           String?
+  decision        String
+  evidence        Json
+  confidence      Decimal  @db.Decimal(5, 2)
+  risk            Json
+  policy          Json
+  approval        Json
+  result          String
+  revenueRescued  Decimal  @db.Decimal(18, 2) @default(0)
+  createdAt       DateTime @default(now())
+
+  merchant     Merchant           @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  action       RecoveryAction     @relation(fields: [actionId], references: [id], onDelete: Restrict)
+  review       HumanReview        @relation(fields: [reviewId], references: [id], onDelete: Restrict)
+  transaction  Transaction?       @relation(fields: [transactionId], references: [id], onDelete: SetNull)
+  customer     Customer?          @relation(fields: [customerId], references: [id], onDelete: SetNull)
+
+  @@index([merchantId, createdAt])
+  @@index([merchantId, actionId, createdAt])
+  @@index([merchantId, reviewId, createdAt])
+  @@index([merchantId, decision, createdAt])
+}
+
+model AuditLog {
+  id           String      @id @default(uuid())
+  merchantId   String
+  userId       String?
+  resourceType String
+  resourceId   String
+  action       AuditAction
+  oldValues    Json?
+  newValues    Json?
+  ipAddress    String?
+  userAgent    String?
+  createdAt    DateTime    @default(now())
+
+  merchant Merchant @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  user     User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([merchantId, resourceType, resourceId])
+  @@index([merchantId, action, createdAt])
+}
+
+model WebhookEvent {
+  id               String    @id @default(uuid())
+  merchantId       String
+  source           String
+  eventType        String
+  providerEventId  String
+  signatureValid   Boolean   @default(false)
+  processingStatus String    @default("received")
+  attemptCount     Int       @default(0)
+  nextRetryAt      DateTime?
+  lastError        String?
+  processedAt      DateTime?
+  deadLetteredAt   DateTime?
+  dedupeKey        String
+  payload          Json
+  idempotencyKey   String?
+  isDeleted        Boolean   @default(false)
+  deletedAt        DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  merchant Merchant @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+
+  @@unique([merchantId, dedupeKey])
+  @@index([merchantId, source, eventType, createdAt])
+}
+
+model RevenueLedger {
+  id            String          @id @default(uuid())
+  merchantId    String
+  transactionId String?
+  paymentId     String?
+  opportunityId String?
+  entryType     LedgerEntryType
+  direction     LedgerDirection
+  amount        Decimal         @db.Decimal(18, 2)
+  currency      String          @default("INR")
+  description   String
+  referenceId   String?
+  createdAt     DateTime        @default(now())
+
+  merchant    Merchant             @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  transaction Transaction?         @relation(fields: [transactionId], references: [id], onDelete: SetNull)
+  payment     Payment?             @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+  opportunity RecoveryOpportunity? @relation(fields: [opportunityId], references: [id], onDelete: SetNull)
+
+  @@unique([merchantId, referenceId])
+  @@index([merchantId, createdAt])
+  @@index([referenceId])
+}
+
+model MerchantMemory {
+  id         String   @id @default(uuid())
+  merchantId String
+  key        String
+  value      Json
+  tags       String[] @default([])
+  summary    String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  merchant Merchant @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+
+  @@unique([merchantId, key])
+  @@index([merchantId, tags])
+}
+
+model Notification {
+  id         String             @id @default(uuid())
+  merchantId String
+  userId     String?
+  type       NotificationType
+  status     NotificationStatus @default(QUEUED)
+  title      String
+  body       String
+  metadata   Json?
+  sentAt     DateTime?
+  createdAt  DateTime           @default(now())
+  updatedAt  DateTime           @updatedAt
+
+  merchant Merchant @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  user     User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([merchantId, status, createdAt])
+}

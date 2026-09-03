@@ -1,0 +1,57 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "jsx": "preserve",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@/database/*": ["./database/*"],
+      "@/auth/*": ["./auth/*"],
+      "@/authorization/*": ["./authorization/*"],
+      "@/demo-data/*": ["./demo-data/*"],
+      "@/razorpay/*": ["./razorpay/*"],
+      "@/razorpay": ["./razorpay/index.ts"],
+      "@/webhooks/*": ["./webhooks/*"],
+      "@/risk-engine/*": ["./risk-engine/*"],
+      "@/risk-engine": ["./risk-engine/index.ts"],
+      "@/recovery-engine/*": ["./recovery-engine/*"],
+      "@/recovery-engine": ["./recovery-engine/index.ts"],
+      "@/agents/*": ["./agents/*"],
+      "@/agents": ["./agents/index.ts"],
+      "@/policies/*": ["./policies/*"],
+      "@/policies": ["./policies/index.ts"],
+      "@/human-review/*": ["./human-review/*"],
+      "@/human-review": ["./human-review/index.ts"]
+    },
+    "types": ["node", "vitest/globals"],
+    "outDir": "dist",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "noEmit": true,
+    "incremental": true,
+    "isolatedModules": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
+  },
+  "include": [
+    "next-env.d.ts",
+    ".next/types/**/*.ts",
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "database/**/*.ts",
+    "prisma/**/*.ts",
+    "tests/**/*.ts",
+    "vitest.config.ts"
+  ],
+  "exclude": ["node_modules"]
+}
