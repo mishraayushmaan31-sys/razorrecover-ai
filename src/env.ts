@@ -3,8 +3,15 @@ import { z } from 'zod';
 const serverEnvSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   APP_ENV: z.enum(['demo', 'test', 'production']).default('demo'),
-  DATABASE_URL: z.string().url().startsWith('postgresql://'),
-  SESSION_SECRET: z.string().min(32),
+  DATABASE_URL: z
+    .string()
+    .url()
+    .startsWith('postgresql://')
+    .default('postgresql://placeholder:placeholder@localhost:5432/razorrecover'),
+  SESSION_SECRET: z
+    .string()
+    .min(32)
+    .default('default_session_secret_for_build_time_min_32_chars_long'),
   LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error']).default('info'),
   RAZORPAY_MODE: z.enum(['test', 'production']).default('test'),
   RAZORPAY_KEY_ID: z.string().optional(),

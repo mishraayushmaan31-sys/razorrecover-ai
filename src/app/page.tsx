@@ -242,10 +242,14 @@ export default function HomePage() {
         {/* ========================================================================= */}
         <aside className="cockpit-sidebar" aria-label="Main Navigation">
           <div>
-            <a className="cockpit-brand" href="/">
+            <button
+              type="button"
+              className="cockpit-brand"
+              onClick={() => setActiveTab('dashboard')}
+            >
               <span className="cockpit-logo-icon">R</span>
               <span>RazorRecover AI</span>
-            </a>
+            </button>
 
             <nav className="cockpit-nav">
               <button

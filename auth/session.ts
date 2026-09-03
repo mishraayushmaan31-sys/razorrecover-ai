@@ -1,5 +1,4 @@
 import { SignJWT, jwtVerify } from 'jose';
-import { cookies } from 'next/headers';
 import { serverEnv } from '@/env';
 
 export const SESSION_COOKIE = 'rr_session';
@@ -44,6 +43,7 @@ export async function readSessionToken(token: string | undefined): Promise<Sessi
 }
 
 export async function setSessionCookie(token: string): Promise<void> {
+  const { cookies } = await import('next/headers');
   const cookieStore = await cookies();
   cookieStore.set(SESSION_COOKIE, token, {
     httpOnly: true,
@@ -55,6 +55,7 @@ export async function setSessionCookie(token: string): Promise<void> {
 }
 
 export async function clearSessionCookie(): Promise<void> {
+  const { cookies } = await import('next/headers');
   const cookieStore = await cookies();
   cookieStore.set(SESSION_COOKIE, '', { httpOnly: true, expires: new Date(0), path: '/' });
 }
