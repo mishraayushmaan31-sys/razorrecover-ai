@@ -15,6 +15,15 @@ jobs:
     name: Lint, Test & Build Validation
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      NODE_ENV: test
+      APP_ENV: test
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/razorrecover
+      SESSION_SECRET: ci-test-environment-session-secret-at-least-32-chars
+      RAZORPAY_WEBHOOK_SECRET: local_webhook_secret
+      ENABLE_DEMO_MODE: 'true'
+      ENABLE_TEST_MODE: 'true'
+      ENABLE_PRODUCTION_MODE: 'false'
 
     steps:
       - name: Checkout Code
@@ -43,19 +52,9 @@ jobs:
 
       - name: Run Vitest Test Suites
         run: npm test
-        env:
-          NODE_ENV: test
-          APP_ENV: test
-          ENABLE_DEMO_MODE: 'true'
-          ENABLE_TEST_MODE: 'true'
-          ENABLE_PRODUCTION_MODE: 'false'
 
       - name: Validate Next.js Production Build
         run: npm run build
-        env:
-          NODE_ENV: production
-          APP_ENV: test
-          DATABASE_URL: 'postgresql://postgres:postgres@localhost:5432/razorrecover'
 
       - name: Run Dependency Vulnerability Audit
         run: npm audit --audit-level=critical || true
